@@ -26,6 +26,7 @@
 .header-cell {
   background-color: #f0f0f0;
   font-weight: bold;
+  cursor: pointer; /* Add cursor pointer for headers */
 }
 
 .empty-cell {
@@ -36,4 +37,10 @@
   border: 1px solid #ddd;
   border-radius: 50%;
   overflow: hidden;
+  cursor: pointer; /* Add cursor pointer for wells */
+}
+
+.well-cell.selected {
+  background-color: #007bff; /* Change background color when selected */
+  color: white;
 }

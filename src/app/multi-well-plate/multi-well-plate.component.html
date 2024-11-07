@@ -10,19 +10,25 @@
   <!-- Column Headers -->
   <div class="row header-row">
     <div class="cell header-cell empty-cell"></div>
-    <div class="cell header-cell" *ngFor="let colHeader of columnHeaders">
+    <div
+      class="cell header-cell"
+      *ngFor="let colHeader of columnHeaders; let colIndex = index"
+      (click)="toggleColumnSelection($event, colIndex)"
+    >
       {{ colHeader }}
     </div>
   </div>
 
   <!-- Wells with Row Headers -->
   <div class="row" *ngFor="let row of wells; let rowIndex = index">
-    <div class="cell header-cell">
+    <div class="cell header-cell" (click)="toggleRowSelection($event, rowIndex)">
       {{ rowHeaders[rowIndex] }}
     </div>
     <div
       class="cell well-cell"
       *ngFor="let well of row"
+      (click)="toggleWellSelection($event, well)"
+      [class.selected]="selection.isSelected(well)"
     >
       <!-- Well content can go here -->
     </div>
