@@ -1,6 +1,14 @@
+.selection-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .plate-container {
   display: inline-block;
   border: 1px solid #ccc;
+  margin: 0 auto;
 }
 
 .row {
@@ -26,4 +34,6 @@
 
 .well-cell {
   border: 1px solid #ddd;
+  border-radius: 50%;
+  overflow: hidden;
 }

@@ -5,6 +5,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MultiWellPlateComponent } from './multi-well-plate/multi-well-plate.component';
+import {MatRadioModule} from "@angular/material/radio";
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -13,7 +15,9 @@ import { MultiWellPlateComponent } from './multi-well-plate/multi-well-plate.com
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    MatRadioModule,
+    FormsModule
   ],
   providers: [
     provideClientHydration(),

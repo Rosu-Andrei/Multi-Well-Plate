@@ -1,26 +1,30 @@
-<div class="plate-container">
+<div class="selection-container">
+  <p>Select Plate Size:</p>
+  <mat-radio-group [(ngModel)]="numberOfWells" (change)="selectPlate(numberOfWells)">
+    <mat-radio-button value="96">96-Well Plate</mat-radio-button>
+    <mat-radio-button value="384">384-Well Plate</mat-radio-button>
+  </mat-radio-group>
+</div>
+
+<div *ngIf="wells.length > 0" class="plate-container">
   <!-- Column Headers -->
   <div class="row header-row">
     <div class="cell header-cell empty-cell"></div>
-    <div class="cell header-cell"
-         *ngFor="let colHeader of columnHeaders"
-    >
+    <div class="cell header-cell" *ngFor="let colHeader of columnHeaders">
       {{ colHeader }}
     </div>
   </div>
-  <div
-    class="row"
-    *ngFor="let row of wells; let rowIndex = index"
-  >
+
+  <!-- Wells with Row Headers -->
+  <div class="row" *ngFor="let row of wells; let rowIndex = index">
     <div class="cell header-cell">
       {{ rowHeaders[rowIndex] }}
     </div>
     <div
       class="cell well-cell"
-      *ngFor="let well of row; let colIndex = index"
+      *ngFor="let well of row"
     >
       <!-- Well content can go here -->
     </div>
   </div>
-
 </div>
