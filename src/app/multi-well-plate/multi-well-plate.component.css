@@ -1,0 +1,29 @@
+.plate-container {
+  display: inline-block;
+  border: 1px solid #ccc;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 30px;
+}
+
+.header-cell {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.empty-cell {
+  background-color: transparent;
+}
+
+.well-cell {
+  border: 1px solid #ddd;
+}

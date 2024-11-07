@@ -1,0 +1,26 @@
+<div class="plate-container">
+  <!-- Column Headers -->
+  <div class="row header-row">
+    <div class="cell header-cell empty-cell"></div>
+    <div class="cell header-cell"
+         *ngFor="let colHeader of columnHeaders"
+    >
+      {{ colHeader }}
+    </div>
+  </div>
+  <div
+    class="row"
+    *ngFor="let row of wells; let rowIndex = index"
+  >
+    <div class="cell header-cell">
+      {{ rowHeaders[rowIndex] }}
+    </div>
+    <div
+      class="cell well-cell"
+      *ngFor="let well of row; let colIndex = index"
+    >
+      <!-- Well content can go here -->
+    </div>
+  </div>
+
+</div>
