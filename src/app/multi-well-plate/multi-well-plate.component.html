@@ -29,3 +29,8 @@
     </div>
   </div>
 </div>
+<div *ngIf="wells.length > 0" class="plate-container">
+<div class="load-btn" (click)="load()">
+  <mat-button-toggle>Load</mat-button-toggle>
+</div>
+</div>

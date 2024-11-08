@@ -3,8 +3,8 @@ import {SelectionModel} from '@angular/cdk/collections';
 
 interface Well {
   id: string;      // Unique identifier (e.g., 'A1', 'B2')
-  row: number;     // Row index (e.g. 1, 2 etc)
-  column: number;  // Column index (e.g 'A', 'B', etc)
+  row?: number;     // Row index (e.g. 1, 2 etc)
+  column?: number;  // Column index (e.g 'A', 'B', etc)
 }
 
 @Component({
@@ -24,6 +24,16 @@ export class MultiWellPlateComponent {
    * Using an object of type SelectionModel, all the selections functionalities are going to be implemented.
    */
   selection = new SelectionModel<Well>(true, []);
+
+  mockWells: Well[] = [
+    {
+      id: "F5",
+    },
+    {
+      id: "A1"
+    }
+
+  ]
 
   /**
    * this method will be called when the user selects a plate size, and will set it here
@@ -163,5 +173,22 @@ export class MultiWellPlateComponent {
       this.selection.clear();
       this.selection.select(...colWells);
     }
+  }
+
+  load() {
+    this.mockWells.forEach(well => {
+      let columnPos = well.id.at(0);
+      let rowPos = well.id.at(1);
+
+      if (columnPos === undefined || rowPos === undefined) {
+        throw new Error("Invalid Position");
+      }
+      let columnNumber = columnPos.charCodeAt(0) - 65;
+      let rowNumber = parseInt(rowPos);
+      this.selection.toggle(this.wells[rowNumber][columnNumber])
+      console.log("row : " + rowNumber)
+      console.log("column : " + columnNumber)
+      console.log(this.wells[rowNumber][columnNumber])
+    });
   }
 }
