@@ -3,8 +3,8 @@ import {SelectionModel} from '@angular/cdk/collections';
 
 interface Well {
   id: string;      // Unique identifier (e.g., 'A1', 'B2')
-  row: number;     // Row index
-  column: number;  // Column index
+  row: number;     // Row index (e.g. 1, 2 etc)
+  column: number;  // Column index (e.g 'A', 'B', etc)
 }
 
 @Component({
@@ -18,21 +18,29 @@ export class MultiWellPlateComponent {
   columns: number = 0;
   rowHeaders: string[] = [];
   columnHeaders: string[] = [];
-  wells: Well[][] = []; // Update wells to be an array of Well objects
+  wells: Well[][] = [];
 
-  // Initialize SelectionModel for multiple selection
+  /**
+   * Using an object of type SelectionModel, all the selections functionalities are going to be implemented.
+   */
   selection = new SelectionModel<Well>(true, []);
 
+  /**
+   * this method will be called when the user selects a plate size, and will set it here
+   */
   selectPlate(plateSize: number | undefined): void {
     if (plateSize != 96 && plateSize != 384) {
       console.error('Unsupported plate size:', plateSize);
       return;
     }
-
     this.numberOfWells = plateSize;
     this.setupPlate();
   }
 
+  /**
+   * called after the numberOfWells has been set and based on its size, the appropriate number of rows and columns
+   * will be set. Also, the generation of headers will happen here.
+   */
   setupPlate(): void {
     // Set rows and columns based on plate size
     if (this.numberOfWells == 96) {
@@ -47,13 +55,15 @@ export class MultiWellPlateComponent {
     this.rowHeaders = [];
     this.columnHeaders = [];
     this.wells = [];
-
-    // Generate row headers ('1', '2', ..., '16')
+    /**
+     * Generate headers for rows
+     */
     for (let i = 0; i < this.rows; i++) {
       this.rowHeaders.push(`${i + 1}`);
     }
-
-    // Generate column headers ('A', 'B', ..., 'Z', 'AA', 'AB', ...)
+    /**
+     * Generate headers for columns
+     */
     this.columnHeaders = Array.from({length: this.columns}, (_, i) => {
       let letters = '';
       let num = i;
@@ -64,7 +74,9 @@ export class MultiWellPlateComponent {
       return letters;
     });
 
-    // Generate wells as Well objects with unique IDs
+    /**
+     * Generate wells
+     */
     for (let row = 0; row < this.rows; row++) {
       const wellRow: Well[] = [];
       for (let column = 0; column < this.columns; column++) {
@@ -76,7 +88,9 @@ export class MultiWellPlateComponent {
     }
   }
 
-  // Toggle selection of a single well
+  /**
+   * Toggle selection for either a single well or for multiple wells if "ctrl" is pressed
+   */
   toggleWellSelection(event: MouseEvent, well: Well): void {
     /**
      * Check if ctrl was pressed (or command for mac)
@@ -100,13 +114,17 @@ export class MultiWellPlateComponent {
     }
   }
 
-  // Toggle selection of an entire row
+  /**
+   * This method does the selection for an entire row if header was pressed
+   */
   toggleRowSelection(event: MouseEvent, rowIndex: number): void {
     const ctrlPressed = event.ctrlKey || event.metaKey;
     const rowWells = this.wells[rowIndex];
 
     if (ctrlPressed) {
-      // Check if all wells in the row are selected
+      /**
+       * check if ever well from the specified row is selected
+       */
       const allSelected = rowWells.every(well => this.selection.isSelected(well));
       if (allSelected) {
         // Deselect all wells in the row
@@ -116,29 +134,32 @@ export class MultiWellPlateComponent {
         this.selection.select(...rowWells);
       }
     } else {
-      // Clear other selections and select the entire row
+      /**
+       * if we are here it means that "ctrl" has not been pressed, and we are focusing on selecting a single row.
+       */
       this.selection.clear();
       this.selection.select(...rowWells);
     }
   }
 
-  // Toggle selection of an entire column
-  toggleColumnSelection(event: MouseEvent, colIndex: number): void {
+  /**
+   * This method does the selection for an entire column if header was pressed
+   */
+  toggleColumnSelection(event: MouseEvent, columnIndex: number): void {
     const ctrlPressed = event.ctrlKey || event.metaKey;
-    const colWells = this.wells.map(row => row[colIndex]);
+    const colWells = this.wells.map(row => row[columnIndex]);
 
     if (ctrlPressed) {
-      // Check if all wells in the column are selected
+
       const allSelected = colWells.every(well => this.selection.isSelected(well));
       if (allSelected) {
-        // Deselect all wells in the column
+
         this.selection.deselect(...colWells);
       } else {
-        // Select all wells in the column
+
         this.selection.select(...colWells);
       }
     } else {
-      // Clear other selections and select the entire column
       this.selection.clear();
       this.selection.select(...colWells);
     }
