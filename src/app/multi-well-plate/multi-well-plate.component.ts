@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {SelectionModel} from '@angular/cdk/collections';
+import {faFlask} from '@fortawesome/free-solid-svg-icons';
 
 interface Well {
   id: string;      // Unique identifier (e.g., 'A1', 'B2')
@@ -20,6 +21,8 @@ export class MultiWellPlateComponent {
   columnHeaders: string[] = [];
   wells: Well[][] = [];
 
+  faFlask = faFlask;
+
   /**
    * Using an object of type SelectionModel, all the selections functionalities are going to be implemented.
    */
@@ -31,6 +34,9 @@ export class MultiWellPlateComponent {
     },
     {
       id: "A1"
+    },
+    {
+      id: "X16"
     }
 
   ]
@@ -176,19 +182,37 @@ export class MultiWellPlateComponent {
   }
 
   load() {
+    this.selection.clear();
     this.mockWells.forEach(well => {
-      let columnPos = well.id.at(0);
-      let rowPos = well.id.at(1);
+      const columnChar = well.id.charAt(0);
+      const rowStr = well.id.slice(1);
 
-      if (columnPos === undefined || rowPos === undefined) {
-        throw new Error("Invalid Position");
+      if (!columnChar || !rowStr) {
+        console.error(`Invalid well ID: ${well.id}`);
+        return;
       }
-      let columnNumber = columnPos.charCodeAt(0) - 65;
-      let rowNumber = parseInt(rowPos);
-      this.selection.toggle(this.wells[rowNumber][columnNumber])
-      console.log("row : " + rowNumber)
-      console.log("column : " + columnNumber)
-      console.log(this.wells[rowNumber][columnNumber])
+
+      const columnIndex = columnChar.charCodeAt(0) - 65; // Convert column char to index (e.g., 'A' -> 0)
+      const rowIndex = parseInt(rowStr, 10) - 1; // Convert row string to index (e.g., '1' -> 0)
+
+      // Check if the calculated indices are within the plate bounds
+      if (
+        rowIndex < 0 ||
+        rowIndex >= this.rows ||
+        columnIndex < 0 ||
+        columnIndex >= this.columns
+      ) {
+        console.error(
+          `Well ID ${well.id} is out of bounds for the current plate size (${this.rows} rows x ${this.columns} columns).`
+        );
+        return;
+      }
+      // Select the well if it is within bounds
+      this.selection.select(this.wells[rowIndex][columnIndex]);
+
+      // Optional: Logging for debugging
+      console.log(`Loaded well: ID=${well.id}, Row=${rowIndex}, Column=${columnIndex}`);
     });
   }
+
 }

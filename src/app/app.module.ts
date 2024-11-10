@@ -8,6 +8,7 @@ import { MultiWellPlateComponent } from './multi-well-plate/multi-well-plate.com
 import {MatRadioModule} from "@angular/material/radio";
 import {FormsModule} from "@angular/forms";
 import {MatButtonToggle} from "@angular/material/button-toggle";
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import {MatButtonToggle} from "@angular/material/button-toggle";
         AppRoutingModule,
         MatRadioModule,
         FormsModule,
-        MatButtonToggle
+        MatButtonToggle,
+        FontAwesomeModule
     ],
   providers: [
     provideClientHydration(),

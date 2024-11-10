@@ -25,12 +25,17 @@
       class="cell well-cell"
       *ngFor="let well of row"
       (click)="toggleWellSelection($event, well)"
-      [class.selected]="selection.isSelected(well)">
+      [class.selected]="selection.isSelected(well)"
+    >
+      <fa-icon [icon]="faFlask" *ngIf="selection.isSelected(well)"></fa-icon>
     </div>
   </div>
+
 </div>
 <div *ngIf="wells.length > 0" class="plate-container">
-<div class="load-btn" (click)="load()">
-  <mat-button-toggle>Load</mat-button-toggle>
+  <div class="load-btn" (click)="load()">
+    <mat-button-toggle>Load</mat-button-toggle>
+  </div>
 </div>
-</div>
+
+

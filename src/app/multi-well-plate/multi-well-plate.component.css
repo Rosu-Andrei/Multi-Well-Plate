@@ -38,9 +38,23 @@
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer; /* Add cursor pointer for wells */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .well-cell.selected {
   background-color: #007bff; /* Change background color when selected */
   color: white;
 }
+
+.well-cell i {
+  font-size: 16px; /* Adjust the size of the icon */
+  color: white; /* Icon color */
+}
+
+.well-cell.selected i {
+  color: #ffffff; /* Ensure the icon is visible on the selected background */
+}
+
