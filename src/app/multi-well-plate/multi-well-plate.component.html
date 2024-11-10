@@ -14,6 +14,10 @@
     <button class="icon-btn" (click)="zoomOut()">
       <fa-icon [icon]="faSearchMinus"></fa-icon>
     </button>
+    <!-- Toggle Side Menu Button -->
+    <button class="icon-btn" (click)="toggleMenu()">
+      <fa-icon [icon]="faBars"></fa-icon>
+    </button>
   </div>
 </div>
 
@@ -25,34 +29,70 @@
   </mat-radio-group>
 </div>
 
-<!-- Wrap the plate and the load button in a single zoom-container -->
-<div class="zoom-container" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top left'">
-  <div *ngIf="wells.length > 0" class="plate-container">
-    <div class="row header-row">
-      <div class="cell header-cell empty-cell"></div>
-      <div
-        class="cell header-cell"
-        *ngFor="let colHeader of columnHeaders; let colIndex = index"
-        (click)="toggleColumnSelection($event, colIndex)">
-        {{ colHeader }}
+<!-- Main Container -->
+<div class="main-container">
+  <!-- Plate and Load Button -->
+  <div class="zoom-container" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top left'">
+    <div *ngIf="wells.length > 0" class="plate-container">
+      <div class="row header-row">
+        <div class="cell header-cell empty-cell"></div>
+        <div class="cell header-cell"
+          *ngFor="let colHeader of columnHeaders; let colIndex = index"
+          (click)="toggleColumnSelection($event, colIndex)">
+          {{ colHeader }}
+        </div>
+      </div>
+
+      <div class="row" *ngFor="let row of wells; let rowIndex = index">
+        <div class="cell header-cell" (click)="toggleRowSelection($event, rowIndex)">
+          {{ rowHeaders[rowIndex] }}
+        </div>
+        <div
+          class="cell well-cell"
+          *ngFor="let well of row"
+          (click)="toggleWellSelection($event, well)"
+          [class.selected]="selection.isSelected(well)">
+          <fa-icon [icon]="faFlask" *ngIf="selection.isSelected(well)"></fa-icon>
+        </div>
       </div>
     </div>
 
-    <div class="row" *ngFor="let row of wells; let rowIndex = index">
-      <div class="cell header-cell" (click)="toggleRowSelection($event, rowIndex)">
-        {{ rowHeaders[rowIndex] }}
-      </div>
-      <div
-        class="cell well-cell"
-        *ngFor="let well of row"
-        (click)="toggleWellSelection($event, well)"
-        [class.selected]="selection.isSelected(well)">
-        <fa-icon [icon]="faFlask" *ngIf="selection.isSelected(well)"></fa-icon>
-      </div>
+    <div class="load-btn">
+      <button mat-button (click)="load()">Load</button>
     </div>
   </div>
 
-  <div class="load-btn">
-    <button mat-button (click)="load()">Load</button>
+  <!-- Side Menu -->
+  <div class="side-menu" *ngIf="menuVisible">
+    <div class="menu-header">
+      <button class="tab-btn" [class.active]="activeTab === 'well-settings'" (click)="setActiveTab('well-settings')">
+        Well Settings
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'table-view'" (click)="setActiveTab('table-view')">
+        Table View
+      </button>
+    </div>
+
+    <div class="menu-content">
+      <div *ngIf="activeTab === 'well-settings'">
+        <h3>Well Settings</h3>
+        <label>Sample ID:</label>
+        <input type="text" [(ngModel)]="sampleId" placeholder="Enter Sample ID"/>
+        <label>Sample Role:</label>
+        <select [(ngModel)]="sampleRole">
+          <option value="Unknown Sample">Unknown Sample</option>
+          <option value="Negative Process Control">Negative Process Control</option>
+          <option value="No Template Control">No Template Control</option>
+          <option value="Positive Process Control">Positive Process Control</option>
+          <option value="Positive Template Control">Positive Template Control</option>
+          <option value="Quantitation Standard">Quantitation Standard</option>
+        </select>
+      </div>
+
+      <div *ngIf="activeTab === 'table-view'">
+        <h3>Table View</h3>
+        <p>TO DO</p>
+      </div>
+    </div>
   </div>
 </div>

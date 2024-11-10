@@ -1,11 +1,11 @@
 import {Component} from '@angular/core';
 import {SelectionModel} from '@angular/cdk/collections';
-import {faEye, faFlask, faSearchMinus, faSearchPlus} from '@fortawesome/free-solid-svg-icons';
+import {faBars, faFlask, faSearchMinus, faSearchPlus} from '@fortawesome/free-solid-svg-icons';
 
 interface Well {
-  id: string; // Unique identifier (e.g., 'A1', 'B2')
-  row?: number; // Row index (e.g. 1, 2, etc)
-  column?: number; // Column index (e.g 'A', 'B', etc)
+  id: string;
+  row?: number;
+  column?: number;
 }
 
 @Component({
@@ -24,8 +24,7 @@ export class MultiWellPlateComponent {
   faFlask = faFlask;
   faSearchPlus = faSearchPlus;
   faSearchMinus = faSearchMinus;
-  faEye = faEye;
-
+  faBars = faBars;
   selection = new SelectionModel<Well>(true, []);
 
   mockWells: Well[] = [
@@ -33,6 +32,11 @@ export class MultiWellPlateComponent {
     {id: 'A1'},
     {id: 'X16'}
   ];
+
+  menuVisible: boolean = false; // Whether the side menu is visible or not
+  activeTab: string = 'well-settings'; // by default, the Well Settings is the active tab when the right side menu is visible
+  sampleId: string = ''; // default sample id for Well Settings
+  sampleRole: string = 'Unknown Sample'; // default sample role in Well Settings
 
   selectPlate(plateSize: number | undefined): void {
     if (plateSize != 96 && plateSize != 384) {
@@ -160,6 +164,14 @@ export class MultiWellPlateComponent {
 
   zoomOut(): void {
     this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1); // Limit zoom out to 50%
+  }
+
+  toggleMenu(): void {
+    this.menuVisible = !this.menuVisible;
+  }
+
+  setActiveTab(tab: string): void {
+    this.activeTab = tab;
   }
 
 }
