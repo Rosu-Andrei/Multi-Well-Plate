@@ -1,11 +1,11 @@
 import {Component} from '@angular/core';
 import {SelectionModel} from '@angular/cdk/collections';
-import {faFlask} from '@fortawesome/free-solid-svg-icons';
+import {faEye, faFlask, faSearchMinus, faSearchPlus} from '@fortawesome/free-solid-svg-icons';
 
 interface Well {
-  id: string;      // Unique identifier (e.g., 'A1', 'B2')
-  row?: number;     // Row index (e.g. 1, 2 etc)
-  column?: number;  // Column index (e.g 'A', 'B', etc)
+  id: string; // Unique identifier (e.g., 'A1', 'B2')
+  row?: number; // Row index (e.g. 1, 2, etc)
+  column?: number; // Column index (e.g 'A', 'B', etc)
 }
 
 @Component({
@@ -20,30 +20,20 @@ export class MultiWellPlateComponent {
   rowHeaders: string[] = [];
   columnHeaders: string[] = [];
   wells: Well[][] = [];
-
+  zoomLevel: number = 1; // Initial zoom level
   faFlask = faFlask;
+  faSearchPlus = faSearchPlus;
+  faSearchMinus = faSearchMinus;
+  faEye = faEye;
 
-  /**
-   * Using an object of type SelectionModel, all the selections functionalities are going to be implemented.
-   */
   selection = new SelectionModel<Well>(true, []);
 
   mockWells: Well[] = [
-    {
-      id: "F5",
-    },
-    {
-      id: "A1"
-    },
-    {
-      id: "X16"
-    }
+    {id: 'F5'},
+    {id: 'A1'},
+    {id: 'X16'}
+  ];
 
-  ]
-
-  /**
-   * this method will be called when the user selects a plate size, and will set it here
-   */
   selectPlate(plateSize: number | undefined): void {
     if (plateSize != 96 && plateSize != 384) {
       console.error('Unsupported plate size:', plateSize);
@@ -53,12 +43,7 @@ export class MultiWellPlateComponent {
     this.setupPlate();
   }
 
-  /**
-   * called after the numberOfWells has been set and based on its size, the appropriate number of rows and columns
-   * will be set. Also, the generation of headers will happen here.
-   */
   setupPlate(): void {
-    // Set rows and columns based on plate size
     if (this.numberOfWells == 96) {
       this.rows = 8;
       this.columns = 12;
@@ -67,19 +52,14 @@ export class MultiWellPlateComponent {
       this.columns = 24;
     }
 
-    // Clear existing data
     this.rowHeaders = [];
     this.columnHeaders = [];
     this.wells = [];
-    /**
-     * Generate headers for rows
-     */
+
     for (let i = 0; i < this.rows; i++) {
       this.rowHeaders.push(`${i + 1}`);
     }
-    /**
-     * Generate headers for columns
-     */
+
     this.columnHeaders = Array.from({length: this.columns}, (_, i) => {
       let letters = '';
       let num = i;
@@ -90,9 +70,6 @@ export class MultiWellPlateComponent {
       return letters;
     });
 
-    /**
-     * Generate wells
-     */
     for (let row = 0; row < this.rows; row++) {
       const wellRow: Well[] = [];
       for (let column = 0; column < this.columns; column++) {
@@ -104,75 +81,42 @@ export class MultiWellPlateComponent {
     }
   }
 
-  /**
-   * Toggle selection for either a single well or for multiple wells if "ctrl" is pressed
-   */
   toggleWellSelection(event: MouseEvent, well: Well): void {
-    /**
-     * Check if ctrl was pressed (or command for mac)
-     */
     const ctrlPressed = event.ctrlKey || event.metaKey;
-
     if (ctrlPressed) {
-      /**
-       * toggle the selection state of a single well. If ctrl was pressed,
-       * we for each visited well we "toggle it", meaning:
-       *    If the well is currently selected: toggle will deselect it, removing it from the selected items.
-       *    If the well is not currently selected: toggle will select it, adding it to the selected items.
-       */
       this.selection.toggle(well);
     } else {
-      /**
-       * If we are here, it means that ctrl isn't pressed, and so we select only one well.
-       */
       this.selection.clear();
       this.selection.select(well);
     }
   }
 
-  /**
-   * This method does the selection for an entire row if header was pressed
-   */
   toggleRowSelection(event: MouseEvent, rowIndex: number): void {
     const ctrlPressed = event.ctrlKey || event.metaKey;
     const rowWells = this.wells[rowIndex];
 
     if (ctrlPressed) {
-      /**
-       * check if ever well from the specified row is selected
-       */
       const allSelected = rowWells.every(well => this.selection.isSelected(well));
       if (allSelected) {
-        // Deselect all wells in the row
         this.selection.deselect(...rowWells);
       } else {
-        // Select all wells in the row
         this.selection.select(...rowWells);
       }
     } else {
-      /**
-       * if we are here it means that "ctrl" has not been pressed, and we are focusing on selecting a single row.
-       */
       this.selection.clear();
       this.selection.select(...rowWells);
     }
   }
 
-  /**
-   * This method does the selection for an entire column if header was pressed
-   */
   toggleColumnSelection(event: MouseEvent, columnIndex: number): void {
     const ctrlPressed = event.ctrlKey || event.metaKey;
     const colWells = this.wells.map(row => row[columnIndex]);
 
     if (ctrlPressed) {
-
       const allSelected = colWells.every(well => this.selection.isSelected(well));
       if (allSelected) {
-
         this.selection.deselect(...colWells);
       } else {
-
         this.selection.select(...colWells);
       }
     } else {
@@ -181,7 +125,7 @@ export class MultiWellPlateComponent {
     }
   }
 
-  load() {
+  load(): void {
     this.selection.clear();
     this.mockWells.forEach(well => {
       const columnChar = well.id.charAt(0);
@@ -192,10 +136,9 @@ export class MultiWellPlateComponent {
         return;
       }
 
-      const columnIndex = columnChar.charCodeAt(0) - 65; // Convert column char to index (e.g., 'A' -> 0)
-      const rowIndex = parseInt(rowStr, 10) - 1; // Convert row string to index (e.g., '1' -> 0)
+      const columnIndex = columnChar.charCodeAt(0) - 65;
+      const rowIndex = parseInt(rowStr, 10) - 1;
 
-      // Check if the calculated indices are within the plate bounds
       if (
         rowIndex < 0 ||
         rowIndex >= this.rows ||
@@ -207,12 +150,16 @@ export class MultiWellPlateComponent {
         );
         return;
       }
-      // Select the well if it is within bounds
       this.selection.select(this.wells[rowIndex][columnIndex]);
-
-      // Optional: Logging for debugging
-      console.log(`Loaded well: ID=${well.id}, Row=${rowIndex}, Column=${columnIndex}`);
     });
+  }
+
+  zoomIn(): void {
+    this.zoomLevel += 0.1; // Increment zoom level
+  }
+
+  zoomOut(): void {
+    this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1); // Limit zoom out to 50%
   }
 
 }

@@ -1,8 +1,60 @@
-.selection-container {
+/* Header Section */
+.header-container {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #ddd;
+}
+
+.header-left,
+.header-center,
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-left label,
+.header-center label {
+  margin-right: 8px;
+}
+
+.header-left input,
+.header-center input {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn i {
+  font-size: 18px;
+  color: #666;
+  transition: color 0.2s ease-in-out;
+}
+
+.icon-btn:hover i {
+  color: #007bff;
+}
+
+/* Zoom container for plate and load button */
+.zoom-container {
+  display: inline-block;
+  transform-origin: top left;
+  transition: transform 0.2s ease-in-out;
 }
 
 .plate-container {
@@ -11,6 +63,7 @@
   margin: 0 auto;
 }
 
+/* Rows and cells */
 .row {
   display: flex;
 }
@@ -26,18 +79,14 @@
 .header-cell {
   background-color: #f0f0f0;
   font-weight: bold;
-  cursor: pointer; /* Add cursor pointer for headers */
-}
-
-.empty-cell {
-  background-color: transparent;
+  cursor: pointer;
 }
 
 .well-cell {
   border: 1px solid #ddd;
   border-radius: 50%;
   overflow: hidden;
-  cursor: pointer; /* Add cursor pointer for wells */
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,16 +94,33 @@
 }
 
 .well-cell.selected {
-  background-color: #007bff; /* Change background color when selected */
+  background-color: #007bff;
   color: white;
 }
 
 .well-cell i {
-  font-size: 16px; /* Adjust the size of the icon */
-  color: white; /* Icon color */
+  font-size: 16px;
+  color: inherit;
 }
 
-.well-cell.selected i {
-  color: #ffffff; /* Ensure the icon is visible on the selected background */
+/* Load Button */
+.load-btn {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
 }
 
+.load-btn button {
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.load-btn button:hover {
+  background-color: #0056b3;
+}

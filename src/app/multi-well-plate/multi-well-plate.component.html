@@ -1,3 +1,22 @@
+<div class="header-container">
+  <div class="header-left">
+    <label for="plate-id">Plate ID:</label>
+    <input id="plate-id" type="text" placeholder="Enter Plate ID"/>
+  </div>
+  <div class="header-center">
+    <label for="plate-name">Plate setup name:</label>
+    <input id="plate-name" type="text" placeholder="Enter Plate Name"/>
+  </div>
+  <div class="header-right">
+    <button class="icon-btn" (click)="zoomIn()">
+      <fa-icon [icon]="faSearchPlus"></fa-icon>
+    </button>
+    <button class="icon-btn" (click)="zoomOut()">
+      <fa-icon [icon]="faSearchMinus"></fa-icon>
+    </button>
+  </div>
+</div>
+
 <div class="selection-container">
   <p>Select Plate Size:</p>
   <mat-radio-group [(ngModel)]="numberOfWells" (change)="selectPlate(numberOfWells)">
@@ -6,36 +25,34 @@
   </mat-radio-group>
 </div>
 
-<div *ngIf="wells.length > 0" class="plate-container">
-  <div class="row header-row">
-    <div class="cell header-cell empty-cell"></div>
-    <div
-      class="cell header-cell"
-      *ngFor="let colHeader of columnHeaders; let colIndex = index"
-      (click)="toggleColumnSelection($event, colIndex)">
-      {{ colHeader }}
+<!-- Wrap the plate and the load button in a single zoom-container -->
+<div class="zoom-container" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top left'">
+  <div *ngIf="wells.length > 0" class="plate-container">
+    <div class="row header-row">
+      <div class="cell header-cell empty-cell"></div>
+      <div
+        class="cell header-cell"
+        *ngFor="let colHeader of columnHeaders; let colIndex = index"
+        (click)="toggleColumnSelection($event, colIndex)">
+        {{ colHeader }}
+      </div>
+    </div>
+
+    <div class="row" *ngFor="let row of wells; let rowIndex = index">
+      <div class="cell header-cell" (click)="toggleRowSelection($event, rowIndex)">
+        {{ rowHeaders[rowIndex] }}
+      </div>
+      <div
+        class="cell well-cell"
+        *ngFor="let well of row"
+        (click)="toggleWellSelection($event, well)"
+        [class.selected]="selection.isSelected(well)">
+        <fa-icon [icon]="faFlask" *ngIf="selection.isSelected(well)"></fa-icon>
+      </div>
     </div>
   </div>
 
-  <div class="row" *ngFor="let row of wells; let rowIndex = index">
-    <div class="cell header-cell" (click)="toggleRowSelection($event, rowIndex)">
-      {{ rowHeaders[rowIndex] }}
-    </div>
-    <div
-      class="cell well-cell"
-      *ngFor="let well of row"
-      (click)="toggleWellSelection($event, well)"
-      [class.selected]="selection.isSelected(well)"
-    >
-      <fa-icon [icon]="faFlask" *ngIf="selection.isSelected(well)"></fa-icon>
-    </div>
+  <div class="load-btn">
+    <button mat-button (click)="load()">Load</button>
   </div>
-
 </div>
-<div *ngIf="wells.length > 0" class="plate-container">
-  <div class="load-btn" (click)="load()">
-    <mat-button-toggle>Load</mat-button-toggle>
-  </div>
-</div>
-
-
