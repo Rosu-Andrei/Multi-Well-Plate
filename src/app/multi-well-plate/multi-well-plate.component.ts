@@ -6,6 +6,8 @@ interface Well {
   id: string;
   row?: number;
   column?: number;
+  sampleRole?: string;
+  sampleId?: string;
 }
 
 @Component({
@@ -37,6 +39,7 @@ export class MultiWellPlateComponent {
   activeTab: string = 'well-settings'; // Default active tab
   sampleId: string = ''; // Default sample ID
   sampleRole: string = 'Unknown Sample'; // Default sample role
+  currentWell: Well | null = null; // Currently selected single well
 
   selectPlate(plateSize: number | undefined): void {
     if (plateSize != 96 && plateSize != 384) {
@@ -61,6 +64,7 @@ export class MultiWellPlateComponent {
     this.wells = [];
 
     for (let i = 0; i < this.rows; i++) {
+      // Assuming row headers are letters (A, B, C, ...)
       this.rowHeaders.push(`${i + 1}`);
     }
 
@@ -93,6 +97,8 @@ export class MultiWellPlateComponent {
       this.selection.clear();
       this.selection.select(well);
     }
+    this.updateCurrentWell();
+    this.updateSampleInfo();
   }
 
   toggleRowSelection(event: MouseEvent, rowIndex: number): void {
@@ -110,6 +116,8 @@ export class MultiWellPlateComponent {
       this.selection.clear();
       this.selection.select(...rowWells);
     }
+    this.updateCurrentWell();
+    this.updateSampleInfo();
   }
 
   toggleColumnSelection(event: MouseEvent, columnIndex: number): void {
@@ -127,6 +135,8 @@ export class MultiWellPlateComponent {
       this.selection.clear();
       this.selection.select(...colWells);
     }
+    this.updateCurrentWell();
+    this.updateSampleInfo();
   }
 
   load(): void {
@@ -180,4 +190,35 @@ export class MultiWellPlateComponent {
     this.activeTab = tab;
   }
 
+  updateCurrentWell(): void {
+    if (this.selection.selected.length === 1) {
+      this.currentWell = this.selection.selected[0];
+    } else {
+      this.currentWell = null;
+    }
+  }
+
+  updateSampleInfo(): void {
+    if (this.currentWell) {
+      this.sampleId = this.currentWell.sampleId || '';
+      this.sampleRole = this.currentWell.sampleRole || 'Unknown Sample';
+    } else {
+      this.sampleId = '';
+      this.sampleRole = 'Unknown Sample';
+    }
+  }
+
+  onSampleIdChange(newSampleId: string): void {
+    this.sampleId = newSampleId;
+    this.selection.selected.forEach(well => {
+      well.sampleId = newSampleId;
+    });
+  }
+
+  onSampleRoleChange(newSampleRole: string): void {
+    this.sampleRole = newSampleRole;
+    this.selection.selected.forEach(well => {
+      well.sampleRole = newSampleRole;
+    });
+  }
 }

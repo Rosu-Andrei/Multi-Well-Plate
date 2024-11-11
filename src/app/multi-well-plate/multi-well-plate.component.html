@@ -57,7 +57,8 @@
             *ngFor="let well of row"
             (click)="toggleWellSelection($event, well)"
             [class.selected]="selection.isSelected(well)">
-            <fa-icon [icon]="faFlask" *ngIf="selection.isSelected(well)"></fa-icon>
+            <fa-icon [icon]="faFlask" class="well-icon" *ngIf="well.sampleRole"></fa-icon>
+            <span class="well-letter" *ngIf="well.sampleRole">{{ well.sampleRole.charAt(0) }}</span>
           </div>
         </div>
       </div>
@@ -80,12 +81,17 @@
     </div>
 
     <div class="menu-content">
+      <!-- Well Settings Tab -->
       <div *ngIf="activeTab === 'well-settings'">
         <h3>Well Settings</h3>
+        <label>Well Position:</label>
+        <input type="text" [value]="currentWell?.id || (selection.selected.length > 1 ? 'Multiple wells selected' : 'None')" readonly />
+
         <label>Sample ID:</label>
-        <input type="text" [(ngModel)]="sampleId" placeholder="Enter Sample ID"/>
+        <input type="text" [(ngModel)]="sampleId" (ngModelChange)="onSampleIdChange($event)" placeholder="Enter Sample ID"/>
+
         <label>Sample Role:</label>
-        <select [(ngModel)]="sampleRole">
+        <select [(ngModel)]="sampleRole" (ngModelChange)="onSampleRoleChange($event)">
           <option value="Unknown Sample">Unknown Sample</option>
           <option value="Negative Process Control">Negative Process Control</option>
           <option value="No Template Control">No Template Control</option>
@@ -95,6 +101,7 @@
         </select>
       </div>
 
+      <!-- Table View Tab -->
       <div *ngIf="activeTab === 'table-view'">
         <h3>Table View</h3>
         <p>TO DO</p>
