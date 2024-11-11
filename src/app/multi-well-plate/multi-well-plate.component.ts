@@ -159,11 +159,12 @@ export class MultiWellPlateComponent {
   }
 
   zoomIn(): void {
-    this.zoomLevel += 0.1; // Increment zoom level
+    this.zoomLevel += 0.1;
   }
 
+  // ensures the zoom level does not go below 0.5 (50% of the original size).
   zoomOut(): void {
-    this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1); // Limit zoom out to 50%
+    this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1);
   }
 
   toggleMenu(): void {
