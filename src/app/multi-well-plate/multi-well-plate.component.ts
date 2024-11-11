@@ -1,6 +1,6 @@
-import {Component} from '@angular/core';
-import {SelectionModel} from '@angular/cdk/collections';
-import {faBars, faFlask, faSearchMinus, faSearchPlus} from '@fortawesome/free-solid-svg-icons';
+import { Component } from '@angular/core';
+import { SelectionModel } from '@angular/cdk/collections';
+import { faBars, faFlask, faSearchMinus, faSearchPlus } from '@fortawesome/free-solid-svg-icons';
 
 interface Well {
   id: string;
@@ -28,15 +28,15 @@ export class MultiWellPlateComponent {
   selection = new SelectionModel<Well>(true, []);
 
   mockWells: Well[] = [
-    {id: 'F5'},
-    {id: 'A1'},
-    {id: 'X16'}
+    { id: 'F5' },
+    { id: 'A1' },
+    { id: 'X16' }
   ];
 
   menuVisible: boolean = false; // Whether the side menu is visible or not
-  activeTab: string = 'well-settings'; // by default, the Well Settings is the active tab when the right side menu is visible
-  sampleId: string = ''; // default sample id for Well Settings
-  sampleRole: string = 'Unknown Sample'; // default sample role in Well Settings
+  activeTab: string = 'well-settings'; // Default active tab
+  sampleId: string = ''; // Default sample ID
+  sampleRole: string = 'Unknown Sample'; // Default sample role
 
   selectPlate(plateSize: number | undefined): void {
     if (plateSize != 96 && plateSize != 384) {
@@ -64,7 +64,7 @@ export class MultiWellPlateComponent {
       this.rowHeaders.push(`${i + 1}`);
     }
 
-    this.columnHeaders = Array.from({length: this.columns}, (_, i) => {
+    this.columnHeaders = Array.from({ length: this.columns }, (_, i) => {
       let letters = '';
       let num = i;
       while (num >= 0) {
@@ -78,7 +78,7 @@ export class MultiWellPlateComponent {
       const wellRow: Well[] = [];
       for (let column = 0; column < this.columns; column++) {
         const id = `${this.columnHeaders[column]}${this.rowHeaders[row]}`;
-        const well: Well = {id, row, column};
+        const well: Well = { id, row, column };
         wellRow.push(well);
       }
       this.wells.push(wellRow);
@@ -159,12 +159,17 @@ export class MultiWellPlateComponent {
   }
 
   zoomIn(): void {
-    this.zoomLevel += 0.1;
+    if (this.zoomLevel < 3) { // Maximum zoom level set to 3x
+      this.zoomLevel += 0.1;
+      this.zoomLevel = Math.round(this.zoomLevel * 10) / 10; // Round to one decimal
+    }
   }
 
-  // ensures the zoom level does not go below 0.5 (50% of the original size).
   zoomOut(): void {
-    this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1);
+    if (this.zoomLevel > 0.5) { // Minimum zoom level set to 0.5x
+      this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1);
+      this.zoomLevel = Math.round(this.zoomLevel * 10) / 10; // Round to one decimal
+    }
   }
 
   toggleMenu(): void {
