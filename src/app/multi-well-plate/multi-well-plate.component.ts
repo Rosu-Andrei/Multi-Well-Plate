@@ -218,6 +218,10 @@ export class MultiWellPlateComponent {
     } else {
       this.sampleId = '';
       this.sampleRole = 'Unknown Sample';
+      this.selection.selected.forEach(well => {
+        this.sampleId += " -> " + well.sampleId;
+        this.sampleRole += " -> " + well.sampleRole; // not working !!
+      })
     }
   }
 
