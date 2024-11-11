@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { SelectionModel } from '@angular/cdk/collections';
-import { faBars, faFlask, faSearchMinus, faSearchPlus } from '@fortawesome/free-solid-svg-icons';
+import {Component} from '@angular/core';
+import {SelectionModel} from '@angular/cdk/collections';
+import {faBars, faFlask, faSearchMinus, faSearchPlus} from '@fortawesome/free-solid-svg-icons';
 
 interface Well {
   id: string;
@@ -30,9 +30,9 @@ export class MultiWellPlateComponent {
   selection = new SelectionModel<Well>(true, []);
 
   mockWells: Well[] = [
-    { id: 'F5' },
-    { id: 'A1' },
-    { id: 'X16' }
+    {id: 'F5'},
+    {id: 'A1'},
+    {id: 'X16'}
   ];
 
   menuVisible: boolean = false; // Whether the side menu is visible or not
@@ -68,7 +68,7 @@ export class MultiWellPlateComponent {
       this.rowHeaders.push(`${i + 1}`);
     }
 
-    this.columnHeaders = Array.from({ length: this.columns }, (_, i) => {
+    this.columnHeaders = Array.from({length: this.columns}, (_, i) => {
       let letters = '';
       let num = i;
       while (num >= 0) {
@@ -82,7 +82,7 @@ export class MultiWellPlateComponent {
       const wellRow: Well[] = [];
       for (let column = 0; column < this.columns; column++) {
         const id = `${this.columnHeaders[column]}${this.rowHeaders[row]}`;
-        const well: Well = { id, row, column };
+        const well: Well = {id, row, column};
         wellRow.push(well);
       }
       this.wells.push(wellRow);
@@ -190,6 +190,13 @@ export class MultiWellPlateComponent {
     this.activeTab = tab;
   }
 
+  /**
+   * this method determines if only a single well has been selected. If it is so,
+   * then the current well will point to this well. If multiple wells are selected or none, then
+   * the current well will receive the null value.
+   *
+   * This method is essential in showing the current selected well position in the readOnly box
+   */
   updateCurrentWell(): void {
     if (this.selection.selected.length === 1) {
       this.currentWell = this.selection.selected[0];
@@ -198,6 +205,12 @@ export class MultiWellPlateComponent {
     }
   }
 
+  /**
+   * This method is very similar in what it does with the one above. The difference is that,
+   * it displays the sampleID and sampleRole that a selected well has.
+   *
+   * If multiple wells are selected, the window will display "" as the id and Unknown Value as the sample role.
+   */
   updateSampleInfo(): void {
     if (this.currentWell) {
       this.sampleId = this.currentWell.sampleId || '';
