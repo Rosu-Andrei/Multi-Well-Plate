@@ -245,6 +245,9 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menu-content select {

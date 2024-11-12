@@ -85,10 +85,13 @@
       <div *ngIf="activeTab === 'well-settings'">
         <h3>Well Settings</h3>
         <label>Well Position:</label>
-        <input type="text" [value]="currentWell?.id || (selection.selected.length > 1 ? 'Multiple wells selected' : 'None')" readonly />
+        <input type="text"
+               [value]="currentWell ? currentWell.id : (selection.selected.length > 0 ? selectedWellsPositions : 'None')"
+               readonly/>
 
         <label>Sample ID:</label>
-        <input type="text" [(ngModel)]="sampleId" (ngModelChange)="onSampleIdChange($event)" placeholder="Enter Sample ID"/>
+        <input type="text" [(ngModel)]="sampleId" (ngModelChange)="onSampleIdChange($event)"
+               placeholder="Enter Sample ID"/>
 
         <label>Sample Role:</label>
         <select [(ngModel)]="sampleRole" (ngModelChange)="onSampleRoleChange($event)">

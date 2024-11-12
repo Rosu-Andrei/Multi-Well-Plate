@@ -40,6 +40,8 @@ export class MultiWellPlateComponent {
   sampleId: string = ''; // Default sample ID
   sampleRole: string = 'Unknown Sample'; // Default sample role
   currentWell: Well | null = null; // Currently selected single well
+  selectedWellsPositions: string = ''; // used for displaying multiple wells selected their ids
+
 
   selectPlate(plateSize: number | undefined): void {
     if (plateSize != 96 && plateSize != 384) {
@@ -200,8 +202,13 @@ export class MultiWellPlateComponent {
   updateCurrentWellPosition(): void {
     if (this.selection.selected.length === 1) {
       this.currentWell = this.selection.selected[0];
+      this.selectedWellsPositions = this.currentWell.id;
+    } else if (this.selection.selected.length > 1) {
+      this.currentWell = null;
+      this.selectedWellsPositions = this.selection.selected.map(well => well.id).join(" ");
     } else {
       this.currentWell = null;
+      this.selectedWellsPositions = '';
     }
   }
 
@@ -219,9 +226,13 @@ export class MultiWellPlateComponent {
       this.sampleId = '';
       this.sampleRole = 'Unknown Sample';
       this.selection.selected.forEach(well => {
-        this.sampleId += " -> " + well.sampleId;
-        this.sampleRole += " -> " + well.sampleRole; // not working !!
-      })
+        if (well.sampleId != undefined) {
+          this.sampleId += well.sampleId + " ";
+        }
+
+      });
+      if (this.sampleId === '')
+        this.sampleId = "No sample id has been entered"
     }
   }
 
