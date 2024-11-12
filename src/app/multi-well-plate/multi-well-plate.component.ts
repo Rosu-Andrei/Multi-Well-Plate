@@ -1,11 +1,13 @@
 import {Component} from '@angular/core';
 import {SelectionModel} from '@angular/cdk/collections';
-import {faFlask} from '@fortawesome/free-solid-svg-icons';
+import {faBars, faFlask, faSearchMinus, faSearchPlus} from '@fortawesome/free-solid-svg-icons';
 
 interface Well {
-  id: string;      // Unique identifier (e.g., 'A1', 'B2')
-  row?: number;     // Row index (e.g. 1, 2 etc)
-  column?: number;  // Column index (e.g 'A', 'B', etc)
+  id: string;
+  row?: number;
+  column?: number;
+  sampleRole?: string;
+  sampleId?: string;
 }
 
 @Component({
@@ -20,30 +22,27 @@ export class MultiWellPlateComponent {
   rowHeaders: string[] = [];
   columnHeaders: string[] = [];
   wells: Well[][] = [];
-
-  faFlask = faFlask;
-
-  /**
-   * Using an object of type SelectionModel, all the selections functionalities are going to be implemented.
-   */
+  zoomLevel: number = 1; // Initial zoom level
   selection = new SelectionModel<Well>(true, []);
 
   mockWells: Well[] = [
-    {
-      id: "F5",
-    },
-    {
-      id: "A1"
-    },
-    {
-      id: "X16"
-    }
+    {id: 'F5'},
+    {id: 'A1'},
+    {id: 'X16'}
+  ];
+  faFlask = faFlask;
+  faSearchPlus = faSearchPlus;
+  faSearchMinus = faSearchMinus;
+  faBars = faBars;
 
-  ]
+  menuVisible: boolean = false; // Whether the side menu is visible or not
+  activeTab: string = 'well-settings'; // Default active tab
+  sampleId: string = ''; // Default sample ID
+  sampleRole: string = 'Unknown Sample'; // Default sample role
+  currentWell: Well | null = null; // Currently selected single well
+  selectedWellsPositions: string = ''; // used for displaying multiple wells selected their ids
 
-  /**
-   * this method will be called when the user selects a plate size, and will set it here
-   */
+
   selectPlate(plateSize: number | undefined): void {
     if (plateSize != 96 && plateSize != 384) {
       console.error('Unsupported plate size:', plateSize);
@@ -53,12 +52,7 @@ export class MultiWellPlateComponent {
     this.setupPlate();
   }
 
-  /**
-   * called after the numberOfWells has been set and based on its size, the appropriate number of rows and columns
-   * will be set. Also, the generation of headers will happen here.
-   */
   setupPlate(): void {
-    // Set rows and columns based on plate size
     if (this.numberOfWells == 96) {
       this.rows = 8;
       this.columns = 12;
@@ -67,19 +61,15 @@ export class MultiWellPlateComponent {
       this.columns = 24;
     }
 
-    // Clear existing data
     this.rowHeaders = [];
     this.columnHeaders = [];
     this.wells = [];
-    /**
-     * Generate headers for rows
-     */
+
     for (let i = 0; i < this.rows; i++) {
+      // Assuming row headers are letters (A, B, C, ...)
       this.rowHeaders.push(`${i + 1}`);
     }
-    /**
-     * Generate headers for columns
-     */
+
     this.columnHeaders = Array.from({length: this.columns}, (_, i) => {
       let letters = '';
       let num = i;
@@ -90,9 +80,6 @@ export class MultiWellPlateComponent {
       return letters;
     });
 
-    /**
-     * Generate wells
-     */
     for (let row = 0; row < this.rows; row++) {
       const wellRow: Well[] = [];
       for (let column = 0; column < this.columns; column++) {
@@ -104,84 +91,57 @@ export class MultiWellPlateComponent {
     }
   }
 
-  /**
-   * Toggle selection for either a single well or for multiple wells if "ctrl" is pressed
-   */
   toggleWellSelection(event: MouseEvent, well: Well): void {
-    /**
-     * Check if ctrl was pressed (or command for mac)
-     */
     const ctrlPressed = event.ctrlKey || event.metaKey;
-
     if (ctrlPressed) {
-      /**
-       * toggle the selection state of a single well. If ctrl was pressed,
-       * we for each visited well we "toggle it", meaning:
-       *    If the well is currently selected: toggle will deselect it, removing it from the selected items.
-       *    If the well is not currently selected: toggle will select it, adding it to the selected items.
-       */
       this.selection.toggle(well);
     } else {
-      /**
-       * If we are here, it means that ctrl isn't pressed, and so we select only one well.
-       */
       this.selection.clear();
       this.selection.select(well);
     }
+    this.updateCurrentWellPosition();
+    this.updateSampleInfo();
   }
 
-  /**
-   * This method does the selection for an entire row if header was pressed
-   */
   toggleRowSelection(event: MouseEvent, rowIndex: number): void {
     const ctrlPressed = event.ctrlKey || event.metaKey;
     const rowWells = this.wells[rowIndex];
 
     if (ctrlPressed) {
-      /**
-       * check if ever well from the specified row is selected
-       */
       const allSelected = rowWells.every(well => this.selection.isSelected(well));
       if (allSelected) {
-        // Deselect all wells in the row
         this.selection.deselect(...rowWells);
       } else {
-        // Select all wells in the row
         this.selection.select(...rowWells);
       }
     } else {
-      /**
-       * if we are here it means that "ctrl" has not been pressed, and we are focusing on selecting a single row.
-       */
       this.selection.clear();
       this.selection.select(...rowWells);
     }
+    this.updateCurrentWellPosition();
+    this.updateSampleInfo();
   }
 
-  /**
-   * This method does the selection for an entire column if header was pressed
-   */
   toggleColumnSelection(event: MouseEvent, columnIndex: number): void {
     const ctrlPressed = event.ctrlKey || event.metaKey;
     const colWells = this.wells.map(row => row[columnIndex]);
 
     if (ctrlPressed) {
-
       const allSelected = colWells.every(well => this.selection.isSelected(well));
       if (allSelected) {
-
         this.selection.deselect(...colWells);
       } else {
-
         this.selection.select(...colWells);
       }
     } else {
       this.selection.clear();
       this.selection.select(...colWells);
     }
+    this.updateCurrentWellPosition();
+    this.updateSampleInfo();
   }
 
-  load() {
+  load(): void {
     this.selection.clear();
     this.mockWells.forEach(well => {
       const columnChar = well.id.charAt(0);
@@ -192,10 +152,9 @@ export class MultiWellPlateComponent {
         return;
       }
 
-      const columnIndex = columnChar.charCodeAt(0) - 65; // Convert column char to index (e.g., 'A' -> 0)
-      const rowIndex = parseInt(rowStr, 10) - 1; // Convert row string to index (e.g., '1' -> 0)
+      const columnIndex = columnChar.charCodeAt(0) - 65;
+      const rowIndex = parseInt(rowStr, 10) - 1;
 
-      // Check if the calculated indices are within the plate bounds
       if (
         rowIndex < 0 ||
         rowIndex >= this.rows ||
@@ -207,12 +166,97 @@ export class MultiWellPlateComponent {
         );
         return;
       }
-      // Select the well if it is within bounds
       this.selection.select(this.wells[rowIndex][columnIndex]);
-
-      // Optional: Logging for debugging
-      console.log(`Loaded well: ID=${well.id}, Row=${rowIndex}, Column=${columnIndex}`);
     });
   }
 
+  zoomIn(): void {
+    if (this.zoomLevel < 3) { // Maximum zoom level set to 3x
+      this.zoomLevel += 0.1;
+      this.zoomLevel = Math.round(this.zoomLevel * 10) / 10; // Round to one decimal
+    }
+  }
+
+  zoomOut(): void {
+    if (this.zoomLevel > 0.5) { // Minimum zoom level set to 0.5x
+      this.zoomLevel = Math.max(0.5, this.zoomLevel - 0.1);
+      this.zoomLevel = Math.round(this.zoomLevel * 10) / 10; // Round to one decimal
+    }
+  }
+
+  toggleMenu(): void {
+    this.menuVisible = !this.menuVisible;
+  }
+
+  setActiveTab(tab: string): void {
+    this.activeTab = tab;
+  }
+
+  /**
+   * this method determines if only a single well has been selected. If it is so,
+   * then the current well will point to this well. If multiple wells are selected or none, then
+   * the current well will receive the null value.
+   *
+   * This method is essential in showing the current selected well position in the readOnly box
+   */
+  updateCurrentWellPosition(): void {
+    if (this.selection.selected.length === 1) {
+      this.currentWell = this.selection.selected[0];
+      this.selectedWellsPositions = this.currentWell.id;
+    } else if (this.selection.selected.length > 1) {
+      this.currentWell = null;
+      this.selectedWellsPositions = this.selection.selected.map(well => well.id).join(" ");
+    } else {
+      this.currentWell = null;
+      this.selectedWellsPositions = '';
+    }
+  }
+
+  /**
+   * This method is very similar in what it does with the one above. The difference is that,
+   * it displays the sampleID and sampleRole that a selected well has.
+   *
+   * If multiple wells are selected, the window will display "" as the id and Unknown Value as the sample role.
+   */
+  updateSampleInfo(): void {
+    if (this.currentWell) {
+      this.sampleId = this.currentWell.sampleId || '';
+      this.sampleRole = this.currentWell.sampleRole || 'Unknown Sample';
+    } else {
+      this.sampleId = '';
+      this.sampleRole = 'Unknown Sample';
+      this.selection.selected.forEach(well => {
+        if (well.sampleId != undefined) {
+          this.sampleId += well.sampleId + " ";
+        }
+
+      });
+      if (this.sampleId === '')
+        this.sampleId = "No sample id has been entered"
+    }
+  }
+
+  /**
+   * When the user enters a sampleId, this method will:
+   * 1. update the component sampleId (because we want to show it updated in the browser)
+   * 2. Each selected well will receive the sampleId entered. (if only one is selected,
+   * the only one will receive it)
+   */
+  onSampleIdChange(newSampleId: string): void {
+    this.sampleId = newSampleId;
+    this.selection.selected.forEach(well => {
+      well.sampleId = newSampleId;
+    });
+  }
+
+  /**
+   * This method is very similar with the one above, the only difference being that
+   * it is updating the Sample Role property.
+   */
+  onSampleRoleChange(newSampleRole: string): void {
+    this.sampleRole = newSampleRole;
+    this.selection.selected.forEach(well => {
+      well.sampleRole = newSampleRole;
+    });
+  }
 }

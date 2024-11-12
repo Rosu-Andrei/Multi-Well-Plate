@@ -1,41 +1,114 @@
+<!-- Header Section -->
+<div class="header-container">
+  <div class="header-left">
+    <label for="plate-id">Plate ID:</label>
+    <input id="plate-id" type="text" placeholder="Enter Plate ID"/>
+  </div>
+  <div class="header-center">
+    <label for="plate-name">Plate setup name:</label>
+    <input id="plate-name" type="text" placeholder="Enter Plate Name"/>
+  </div>
+  <div class="header-right">
+    <button class="icon-btn" (click)="zoomIn()">
+      <fa-icon [icon]="faSearchPlus"></fa-icon>
+    </button>
+    <button class="icon-btn" (click)="zoomOut()">
+      <fa-icon [icon]="faSearchMinus"></fa-icon>
+    </button>
+    <!-- Toggle Side Menu Button -->
+    <button class="icon-btn" (click)="toggleMenu()">
+      <fa-icon [icon]="faBars"></fa-icon>
+    </button>
+  </div>
+</div>
+
+<!-- Selection Container -->
 <div class="selection-container">
   <p>Select Plate Size:</p>
   <mat-radio-group [(ngModel)]="numberOfWells" (change)="selectPlate(numberOfWells)">
-    <mat-radio-button value="96">96-Well Plate</mat-radio-button>
-    <mat-radio-button value="384">384-Well Plate</mat-radio-button>
+    <mat-radio-button [value]="96">96-Well Plate</mat-radio-button>
+    <mat-radio-button [value]="384">384-Well Plate</mat-radio-button>
   </mat-radio-group>
 </div>
 
-<div *ngIf="wells.length > 0" class="plate-container">
-  <div class="row header-row">
-    <div class="cell header-cell empty-cell"></div>
-    <div
-      class="cell header-cell"
-      *ngFor="let colHeader of columnHeaders; let colIndex = index"
-      (click)="toggleColumnSelection($event, colIndex)">
-      {{ colHeader }}
+<!-- Main Container -->
+<div class="main-container">
+  <!-- Scrollable Container -->
+  <div class="scroll-container">
+    <!-- Zoom Container -->
+    <div class="zoom-container" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top left'">
+      <div *ngIf="wells.length > 0" class="plate-container">
+        <!-- Plate Content -->
+        <div class="row header-row">
+          <div class="cell header-cell empty-cell"></div>
+          <div class="cell header-cell"
+               *ngFor="let colHeader of columnHeaders; let colIndex = index"
+               (click)="toggleColumnSelection($event, colIndex)">
+            {{ colHeader }}
+          </div>
+        </div>
+
+        <div class="row" *ngFor="let row of wells; let rowIndex = index">
+          <div class="cell header-cell" (click)="toggleRowSelection($event, rowIndex)">
+            {{ rowHeaders[rowIndex] }}
+          </div>
+          <div
+            class="cell well-cell"
+            *ngFor="let well of row"
+            (click)="toggleWellSelection($event, well)"
+            [class.selected]="selection.isSelected(well)">
+            <fa-icon [icon]="faFlask" class="well-icon" *ngIf="well.sampleRole"></fa-icon>
+            <span class="well-letter" *ngIf="well.sampleRole">{{ well.sampleRole.charAt(0) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="load-btn">
+        <button mat-button (click)="load()">Load</button>
+      </div>
     </div>
   </div>
 
-  <div class="row" *ngFor="let row of wells; let rowIndex = index">
-    <div class="cell header-cell" (click)="toggleRowSelection($event, rowIndex)">
-      {{ rowHeaders[rowIndex] }}
+  <!-- Side Menu -->
+  <div class="side-menu" *ngIf="menuVisible">
+    <div class="menu-header">
+      <button class="tab-btn" [class.active]="activeTab === 'well-settings'" (click)="setActiveTab('well-settings')">
+        Well Settings
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'table-view'" (click)="setActiveTab('table-view')">
+        Table View
+      </button>
     </div>
-    <div
-      class="cell well-cell"
-      *ngFor="let well of row"
-      (click)="toggleWellSelection($event, well)"
-      [class.selected]="selection.isSelected(well)"
-    >
-      <fa-icon [icon]="faFlask" *ngIf="selection.isSelected(well)"></fa-icon>
+
+    <div class="menu-content">
+      <!-- Well Settings Tab -->
+      <div *ngIf="activeTab === 'well-settings'">
+        <h3>Well Settings</h3>
+        <label>Well Position:</label>
+        <input type="text"
+               [value]="currentWell ? currentWell.id : (selection.selected.length > 0 ? selectedWellsPositions : 'None')"
+               readonly/>
+
+        <label>Sample ID:</label>
+        <input type="text" [(ngModel)]="sampleId" (ngModelChange)="onSampleIdChange($event)"
+               placeholder="Enter Sample ID"/>
+
+        <label>Sample Role:</label>
+        <select [(ngModel)]="sampleRole" (ngModelChange)="onSampleRoleChange($event)">
+          <option value="Unknown Sample">Unknown Sample</option>
+          <option value="Negative Process Control">Negative Process Control</option>
+          <option value="No Template Control">No Template Control</option>
+          <option value="Positive Process Control">Positive Process Control</option>
+          <option value="Positive Template Control">Positive Template Control</option>
+          <option value="Quantitation Standard">Quantitation Standard</option>
+        </select>
+      </div>
+
+      <!-- Table View Tab -->
+      <div *ngIf="activeTab === 'table-view'">
+        <h3>Table View</h3>
+        <p>TO DO</p>
+      </div>
     </div>
   </div>
-
 </div>
-<div *ngIf="wells.length > 0" class="plate-container">
-  <div class="load-btn" (click)="load()">
-    <mat-button-toggle>Load</mat-button-toggle>
-  </div>
-</div>
-
-
