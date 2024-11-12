@@ -75,13 +75,10 @@
 
 /* Scrollable Container */
 .scroll-container {
-  display: flex; /* Center the content */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
-  width: 100%;
+  position: relative;
+  overflow: auto;
   max-width: calc(100vw - 320px); /* Adjust based on side menu width */
   max-height: 80vh; /* Adjust as needed */
-  overflow: auto;
   border: 1px solid #ccc;
   border-radius: 8px; /* Rounded corners */
   background-color: #fdfdfd; /* Light background */
@@ -90,45 +87,46 @@
   box-sizing: border-box;
 }
 
-/* Customize Scrollbar */
-.scroll-container::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Lighter background for the track */
-  border-radius: 5px; /* Match with the thumb's radius */
-}
-
-.scroll-container::-webkit-scrollbar-thumb {
-  background: #888; /* Thumb color */
-  border-radius: 5px; /* Rounded thumb */
-}
-
-.scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Darker color on hover */
-}
-
 /* Zoom Container */
 .zoom-container {
   transform-origin: top left;
   transition: transform 0.2s ease-in-out;
-  display: inline-block;
 }
 
 /* Plate Container */
 .plate-container {
+  position: relative;
   display: inline-block;
-  border: 1px solid #ccc;
-  margin: 0 auto;
 }
 
-/* Rows and cells */
+/* Column Headers */
+.header-row {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: #f0f0f0;
+}
+
+/* Plate Content Wrapper */
+.plate-content-wrapper {
+  display: block;
+}
+
+/* Row */
 .row {
   display: flex;
 }
 
+/* Row Header */
+.row-header {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: #f0f0f0;
+}
+
+/* Cell */
 .cell {
   width: 30px;
   height: 30px;
@@ -137,17 +135,21 @@
   line-height: 30px;
 }
 
+/* Header Cell */
 .header-cell {
   background-color: #f0f0f0;
   font-weight: bold;
   cursor: pointer;
+  border: 1px solid #ddd;
 }
 
+/* Empty Cell */
 .empty-cell {
-  background-color: transparent;
+  background-color: #f0f0f0;
   cursor: default;
 }
 
+/* Well Cell */
 .well-cell {
   border: 1px solid #ddd;
   border-radius: 50%;
@@ -159,12 +161,14 @@
   position: relative;
 }
 
+/* Selected Well Cell */
 .well-cell.selected {
   background-color: #007bff;
   color: white;
 }
 
-.well-cell i {
+/* Well Icon */
+.well-icon {
   font-size: 16px;
   color: inherit;
 }
@@ -259,6 +263,22 @@
 .menu-content p {
   font-size: 14px;
   color: #666;
+}
+
+/* Ensure headers cover wells underneath */
+.header-cell {
+  background-color: #f0f0f0;
+  z-index: 2;
+}
+
+.row-header {
+  background-color: #f0f0f0;
+  z-index: 3;
+}
+
+/* Adjust z-index of wells */
+.well-cell {
+  z-index: 1;
 }
 
 /* Responsive Adjustments */

@@ -38,7 +38,7 @@
     <!-- Zoom Container -->
     <div class="zoom-container" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top left'">
       <div *ngIf="wells.length > 0" class="plate-container">
-        <!-- Plate Content -->
+        <!-- Column Headers -->
         <div class="row header-row">
           <div class="cell header-cell empty-cell"></div>
           <div class="cell header-cell"
@@ -48,21 +48,27 @@
           </div>
         </div>
 
-        <div class="row" *ngFor="let row of wells; let rowIndex = index">
-          <div class="cell header-cell" (click)="toggleRowSelection($event, rowIndex)">
-            {{ rowHeaders[rowIndex] }}
-          </div>
-          <div
-            class="cell well-cell"
-            *ngFor="let well of row"
-            (click)="toggleWellSelection($event, well)"
-            [class.selected]="selection.isSelected(well)">
-            <fa-icon [icon]="faFlask" class="well-icon" *ngIf="well.sampleRole"></fa-icon>
-            <span class="well-letter" *ngIf="well.sampleRole">{{ well.sampleRole.charAt(0) }}</span>
+        <!-- Plate Content Wrapper -->
+        <div class="plate-content-wrapper">
+          <div class="row" *ngFor="let row of wells; let rowIndex = index">
+            <!-- Row Header -->
+            <div class="cell header-cell row-header" (click)="toggleRowSelection($event, rowIndex)">
+              {{ rowHeaders[rowIndex] }}
+            </div>
+            <!-- Wells -->
+            <div
+              class="cell well-cell"
+              *ngFor="let well of row"
+              (click)="toggleWellSelection($event, well)"
+              [class.selected]="selection.isSelected(well)">
+              <fa-icon [icon]="faFlask" class="well-icon" *ngIf="well.sampleRole"></fa-icon>
+              <span class="well-letter" *ngIf="well.sampleRole">{{ well.sampleRole.charAt(0) }}</span>
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- Load Button -->
       <div class="load-btn">
         <button mat-button (click)="load()">Load</button>
       </div>
