@@ -91,16 +91,99 @@ export class MultiWellPlateComponent {
     }
   }
 
+  /**
+   * The purpose of this property is to keep track of the last well that was selected before
+   * using the ctrl + shift combination. It represents the starting point
+   */
+  lastSelectedWell: Well | null = null;
+
   toggleWellSelection(event: MouseEvent, well: Well): void {
     const ctrlPressed = event.ctrlKey || event.metaKey;
-    if (ctrlPressed) {
+    const shiftPressed = event.shiftKey;
+    /**
+     * We verify that both ctrl and shift are pressed, and also if the lastSelectedWell has been
+     * selected, so we have a starting point.
+     */
+    if (ctrlPressed && shiftPressed && this.lastSelectedWell) {
+      /**
+       * we retrieve all the wells in the range defined by the ctrl + shift.
+       * After that, all the wells in that array are put in the selection.select array,
+       * thus making them selected.
+       */
+      const newSelection = this.getWellsInRange(this.lastSelectedWell, well);
+      this.selection.select(...newSelection);
+      /**
+       * If only ctrl is pressed, then we are in the scenario where we select multiple
+       * wells that can be anywhere on the plate.
+       */
+    } else if (ctrlPressed) {
       this.selection.toggle(well);
+      /**
+       * here we also update the lastSelectedWell just in case we then want to use
+       * the shift functionality.
+       */
+      this.lastSelectedWell = well;
+      /**
+       * Here we are if no key on the keyboard has been pressed. It means
+       * that we are selecting only a single well.
+       */
     } else {
       this.selection.clear();
       this.selection.select(well);
+      this.lastSelectedWell = well;
     }
+    /**
+     * called to update the current well position in the well settings tab
+     */
     this.updateCurrentWellPosition();
+    /**
+     * called to update the current well sampleId and sampleRole in the well settings tab.
+     */
     this.updateSampleInfo();
+  }
+
+  /**
+   * This is the method that calculates and returns them as an array, all the wells
+   * that are going to be selected when using ctrl + shift.
+   *
+   * the startWell is going to be always lastSelectionWell
+   * the endWell is the well parameter of the toggleWellSelection method.
+   * (the well that the user clicks while holding ctrl + shift/0
+   */
+  getWellsInRange(startWell: Well, endWell: Well): Well[] {
+    /**
+     * first, we extract the row and column coordinates of both the start and the last well.
+     * The "!" used tells typescript that all of those values can't be null or undefined
+     * at this point. So now, the range is defined
+     */
+    const startRow = startWell.row!;
+    const endRow = endWell.row!;
+    const startCol = startWell.column!;
+    const endCol = endWell.column!;
+    /**
+     * Based on the range defined earlier, we now set the boundaries of the rectangular, so
+     * that we iterate only over the necessary wells.
+     * To this extend, we calculate:
+     * minRow -> indices of the smallest row
+     * maxRow -> indices of the largest row
+     * _same for the columns_
+     */
+    const minRow = Math.min(startRow, endRow);
+    const maxRow = Math.max(startRow, endRow);
+    const minCol = Math.min(startCol, endCol);
+    const maxCol = Math.min(Math.max(startCol, endCol), this.columns - 1); // prevents out of bound error
+    /**
+     * we initialise an empty well array that will hold all the wells within the range, that
+     * later will be marked as selected.
+     */
+    const wellsInRange: Well[] = [];
+
+    for (let row = minRow; row <= maxRow; row++) {
+      for (let col = minCol; col <= maxCol; col++) {
+        wellsInRange.push(this.wells[row][col]);
+      }
+    }
+    return wellsInRange;
   }
 
   toggleRowSelection(event: MouseEvent, rowIndex: number): void {
