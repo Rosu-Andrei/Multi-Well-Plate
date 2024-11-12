@@ -23,10 +23,6 @@ export class MultiWellPlateComponent {
   columnHeaders: string[] = [];
   wells: Well[][] = [];
   zoomLevel: number = 1; // Initial zoom level
-  faFlask = faFlask;
-  faSearchPlus = faSearchPlus;
-  faSearchMinus = faSearchMinus;
-  faBars = faBars;
   selection = new SelectionModel<Well>(true, []);
 
   mockWells: Well[] = [
@@ -34,6 +30,10 @@ export class MultiWellPlateComponent {
     {id: 'A1'},
     {id: 'X16'}
   ];
+  faFlask = faFlask;
+  faSearchPlus = faSearchPlus;
+  faSearchMinus = faSearchMinus;
+  faBars = faBars;
 
   menuVisible: boolean = false; // Whether the side menu is visible or not
   activeTab: string = 'well-settings'; // Default active tab
@@ -97,7 +97,7 @@ export class MultiWellPlateComponent {
       this.selection.clear();
       this.selection.select(well);
     }
-    this.updateCurrentWell();
+    this.updateCurrentWellPosition();
     this.updateSampleInfo();
   }
 
@@ -116,7 +116,7 @@ export class MultiWellPlateComponent {
       this.selection.clear();
       this.selection.select(...rowWells);
     }
-    this.updateCurrentWell();
+    this.updateCurrentWellPosition();
     this.updateSampleInfo();
   }
 
@@ -135,7 +135,7 @@ export class MultiWellPlateComponent {
       this.selection.clear();
       this.selection.select(...colWells);
     }
-    this.updateCurrentWell();
+    this.updateCurrentWellPosition();
     this.updateSampleInfo();
   }
 
@@ -197,7 +197,7 @@ export class MultiWellPlateComponent {
    *
    * This method is essential in showing the current selected well position in the readOnly box
    */
-  updateCurrentWell(): void {
+  updateCurrentWellPosition(): void {
     if (this.selection.selected.length === 1) {
       this.currentWell = this.selection.selected[0];
     } else {
@@ -225,6 +225,12 @@ export class MultiWellPlateComponent {
     }
   }
 
+  /**
+   * When the user enters a sampleId, this method will:
+   * 1. update the component sampleId (because we want to show it updated in the browser)
+   * 2. Each selected well will receive the sampleId entered. (if only one is selected,
+   * the only one will receive it)
+   */
   onSampleIdChange(newSampleId: string): void {
     this.sampleId = newSampleId;
     this.selection.selected.forEach(well => {
@@ -232,6 +238,10 @@ export class MultiWellPlateComponent {
     });
   }
 
+  /**
+   * This method is very similar with the one above, the only difference being that
+   * it is updating the Sample Role property.
+   */
   onSampleRoleChange(newSampleRole: string): void {
     this.sampleRole = newSampleRole;
     this.selection.selected.forEach(well => {
