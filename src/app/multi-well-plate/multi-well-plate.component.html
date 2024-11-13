@@ -30,49 +30,81 @@
     <mat-radio-button [value]="384">384-Well Plate</mat-radio-button>
   </mat-radio-group>
 </div>
-
-<!-- Main Container -->
+<!-- Main Container for Plate and Side Menu -->
 <div class="main-container">
-  <!-- Scrollable Container -->
-  <div class="scroll-container">
-    <!-- Zoom Container -->
-    <div class="zoom-container" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top left'">
-      <div *ngIf="wells.length > 0" class="plate-container">
-        <!-- Column Headers -->
-        <div class="row header-row">
-          <div class="cell header-cell empty-cell"></div>
-          <div class="cell header-cell"
-               *ngFor="let colHeader of columnHeaders; let colIndex = index"
-               (click)="toggleColumnSelection($event, colIndex)">
-            {{ colHeader }}
-          </div>
-        </div>
 
-        <!-- Plate Content Wrapper -->
-        <div class="plate-content-wrapper">
-          <div class="row" *ngFor="let row of wells; let rowIndex = index">
-            <!-- Row Header -->
-            <div class="cell header-cell row-header" (click)="toggleRowSelection($event, rowIndex)">
-              {{ rowHeaders[rowIndex] }}
-            </div>
-            <!-- Wells -->
-            <div
-              class="cell well-cell"
-              *ngFor="let well of row"
-              (click)="toggleWellSelection($event, well)"
-              [class.selected]="selection.isSelected(well)">
-              <fa-icon [icon]="faFlask" class="well-icon" *ngIf="well.sampleRole"></fa-icon>
-              <span class="well-letter" *ngIf="well.sampleRole">{{ well.sampleRole.charAt(0) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+  <!-- Plate Wrapper -->
+  <div class="plate-wrapper">
 
-      <!-- Load Button -->
-      <div class="load-btn">
-        <button mat-button (click)="load()">Load</button>
+    <!-- Column Headers -->
+    <div class="column-headers">
+      <div class="row header-row">
+        <div class="cell header-cell empty-cell"></div>
+        <div
+          class="cell header-cell"
+          *ngFor="let colHeader of columnHeaders; let colIndex = index"
+          (click)="toggleColumnSelection($event, colIndex)"
+        >
+          {{ colHeader }}
+        </div>
       </div>
     </div>
+
+    <!-- Row Headers and Scrollable Plate Container Wrapper -->
+    <div class="plate-and-rows-wrapper">
+
+      <!-- Row Headers -->
+      <div class="row-headers">
+        <div
+          class="row-header"
+          *ngFor="let rowHeader of rowHeaders; let rowIndex = index"
+          (click)="toggleRowSelection($event, rowIndex)"
+        >
+          {{ rowHeader }}
+        </div>
+      </div>
+
+      <!-- Scrollable Container -->
+      <div class="scroll-container">
+        <!-- Zoom Container -->
+        <div
+          class="zoom-container"
+          [style.transform]="'scale(' + zoomLevel + ')'"
+          [style.transformOrigin]="'top left'"
+        >
+          <div *ngIf="wells.length > 0" class="plate-container">
+            <!-- Plate Content Wrapper -->
+            <div class="plate-content-wrapper">
+              <div class="row" *ngFor="let row of wells; let rowIndex = index">
+                <!-- Wells -->
+                <div
+                  class="cell well-cell"
+                  *ngFor="let well of row"
+                  (click)="toggleWellSelection($event, well)"
+                  [class.selected]="selection.isSelected(well)"
+                >
+                  <fa-icon
+                    [icon]="faFlask"
+                    class="well-icon"
+                    *ngIf="well.sampleRole"
+                  ></fa-icon>
+                  <span class="well-letter" *ngIf="well.sampleRole">
+                    {{ well.sampleRole.charAt(0) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Load Button -->
+          <div class="load-btn">
+            <button mat-button (click)="load()">Load</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
   <!-- Side Menu -->
@@ -117,4 +149,5 @@
       </div>
     </div>
   </div>
+
 </div>

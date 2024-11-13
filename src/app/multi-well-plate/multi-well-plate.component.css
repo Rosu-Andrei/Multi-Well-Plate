@@ -1,71 +1,4 @@
-/* Header Section */
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #ddd;
-}
-
-.header-left,
-.header-center,
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.header-left label,
-.header-center label {
-  margin-right: 8px;
-}
-
-.header-left input,
-.header-center input {
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  outline: none;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  margin-left: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-btn i {
-  font-size: 18px;
-  color: #666;
-  transition: color 0.2s ease-in-out;
-}
-
-.icon-btn:hover i {
-  color: #007bff;
-}
-
-/* Selection Container */
-.selection-container {
-  margin-bottom: 20px;
-}
-
-.selection-container p {
-  margin-bottom: 8px;
-  font-weight: bold;
-}
-
-.mat-radio-group {
-  display: flex;
-  gap: 20px;
-}
-
-/* Main container for plate and side menu */
+/* Main Container for Plate and Side Menu */
 .main-container {
   display: flex;
   justify-content: flex-start;
@@ -73,11 +6,67 @@
   width: 100%;
 }
 
+/* Plate Wrapper */
+.plate-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Adjust based on side menu width */
+}
+
+/* Column Headers */
+.column-headers {
+  display: flex;
+}
+
+.column-headers .header-row {
+  display: flex;
+  margin-left: 21px;
+}
+
+.column-headers .header-cell {
+  width: 30px; /* Ensure consistent cell width */
+  height: 30px;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 30px;
+  background-color: #f0f0f0;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+/* Plate and Rows Wrapper */
+.plate-and-rows-wrapper {
+  display: flex;
+}
+
+/* Row Headers */
+.row-headers {
+  display: flex;
+  flex-direction: column;
+  margin-right: 10px; /* Space between row headers and plate */
+}
+
+.row-headers .row-header {
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 30px;
+  background-color: #f0f0f0;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  /* Optional: Make row headers sticky */
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
 /* Scrollable Container */
 .scroll-container {
-  position: relative;
-  overflow: auto;
-  max-width: calc(100vw - 320px); /* Adjust based on side menu width */
+  overflow-y: auto; /* Enable vertical scrolling */
   max-height: 80vh; /* Adjust as needed */
   border: 1px solid #ccc;
   border-radius: 8px; /* Rounded corners */
@@ -99,15 +88,6 @@
   display: inline-block;
 }
 
-/* Column Headers */
-.header-row {
-  display: flex;
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: #f0f0f0;
-}
-
 /* Plate Content Wrapper */
 .plate-content-wrapper {
   display: block;
@@ -116,14 +96,6 @@
 /* Row */
 .row {
   display: flex;
-}
-
-/* Row Header */
-.row-header {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background-color: #f0f0f0;
 }
 
 /* Cell */
@@ -141,6 +113,7 @@
   font-weight: bold;
   cursor: pointer;
   border: 1px solid #ddd;
+  z-index: 2; /* Ensure headers cover wells underneath */
 }
 
 /* Empty Cell */
@@ -159,6 +132,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  z-index: 1; /* Adjust z-index of wells */
 }
 
 /* Selected Well Cell */
@@ -195,7 +169,7 @@
   background-color: #0056b3;
 }
 
-/* Right-side menu */
+/* Side Menu */
 .side-menu {
   width: 300px;
   margin-left: 20px; /* Space between the plate and the side menu */
@@ -276,13 +250,12 @@
   z-index: 3;
 }
 
-/* Adjust z-index of wells */
-.well-cell {
-  z-index: 1;
-}
-
 /* Responsive Adjustments */
 @media screen and (max-width: 768px) {
+  .plate-wrapper {
+    width: 100%;
+  }
+
   .scroll-container {
     max-width: 100%;
     max-height: 60vh; /* Adjust for smaller screens */
