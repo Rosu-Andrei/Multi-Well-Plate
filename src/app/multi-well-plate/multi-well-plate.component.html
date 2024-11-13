@@ -37,7 +37,8 @@
   <div class="plate-wrapper">
 
     <!-- Column Headers -->
-    <div class="column-headers">
+    <div class="column-headers zoom-container"
+    >
       <div class="row header-row">
         <div
           class="cell header-cell"
@@ -95,15 +96,12 @@
             </div>
           </div>
 
-          <!-- Load Button -->
-          <div class="load-btn">
-            <button mat-button (click)="load()">Load</button>
-          </div>
         </div>
       </div>
-
     </div>
-
+  </div>
+  <div class="load-btn">
+    <button mat-button (click)="load()">Load</button>
   </div>
 
   <!-- Side Menu -->
