@@ -50,22 +50,6 @@
   color: #007bff;
 }
 
-/* Selection Container */
-.selection-container {
-  margin-bottom: 20px;
-}
-
-.selection-container p {
-  margin-bottom: 8px;
-  font-weight: bold;
-}
-
-.mat-radio-group {
-  display: flex;
-  gap: 20px;
-}
-
-/* Main container for plate and side menu */
 .main-container {
   display: flex;
   justify-content: flex-start;
@@ -73,17 +57,73 @@
   width: 100%;
 }
 
+/* Plate Wrapper */
+.plate-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Adjust based on side menu width */
+}
+
+/* Column Headers */
+.column-headers {
+  display: flex;
+}
+
+.column-headers .header-row {
+  display: flex;
+  margin-left: 30px; /* Updated from 21px to 30px */
+}
+
+.column-headers .header-cell {
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 30px;
+  background-color: #f0f0f0;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+/* Plate and Rows Wrapper */
+.plate-and-rows-wrapper {
+  display: flex;
+}
+
+/* Row Headers */
+.row-headers {
+  display: flex;
+  flex-direction: column;
+  margin-right: 0; /* Changed from 10px to 0 */
+}
+
+.row-headers .row-header {
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 30px;
+  background-color: #f0f0f0;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  /* Optional: Make row headers sticky */
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
 /* Scrollable Container */
 .scroll-container {
-  position: relative;
-  overflow: auto;
-  max-width: calc(100vw - 320px); /* Adjust based on side menu width */
-  max-height: 80vh; /* Adjust as needed */
+  overflow-y: auto;
+  max-height: 80vh;
   border: 1px solid #ccc;
-  border-radius: 8px; /* Rounded corners */
-  background-color: #fdfdfd; /* Light background */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  padding: 20px; /* Add spacing around content */
+  border-radius: 8px;
+  background-color: #fdfdfd;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 0; /* Removed padding */
   box-sizing: border-box;
 }
 
@@ -99,15 +139,6 @@
   display: inline-block;
 }
 
-/* Column Headers */
-.header-row {
-  display: flex;
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  background-color: #f0f0f0;
-}
-
 /* Plate Content Wrapper */
 .plate-content-wrapper {
   display: block;
@@ -116,14 +147,6 @@
 /* Row */
 .row {
   display: flex;
-}
-
-/* Row Header */
-.row-header {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background-color: #f0f0f0;
 }
 
 /* Cell */
@@ -141,6 +164,7 @@
   font-weight: bold;
   cursor: pointer;
   border: 1px solid #ddd;
+  z-index: 2;
 }
 
 /* Empty Cell */
@@ -159,6 +183,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  z-index: 1;
 }
 
 /* Selected Well Cell */
@@ -195,10 +220,10 @@
   background-color: #0056b3;
 }
 
-/* Right-side menu */
+/* Side Menu */
 .side-menu {
   width: 300px;
-  margin-left: 20px; /* Space between the plate and the side menu */
+  margin-left: 20px;
   border-left: 1px solid #ddd;
   background-color: #f9f9f9;
   padding: 10px;
@@ -276,17 +301,16 @@
   z-index: 3;
 }
 
-/* Adjust z-index of wells */
-.well-cell {
-  z-index: 1;
-}
-
 /* Responsive Adjustments */
 @media screen and (max-width: 768px) {
+  .plate-wrapper {
+    width: 100%;
+  }
+
   .scroll-container {
     max-width: 100%;
-    max-height: 60vh; /* Adjust for smaller screens */
-    padding: 10px; /* Adjust padding for smaller screens */
+    max-height: 60vh;
+    padding: 10px;
   }
 
   .main-container {
