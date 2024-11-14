@@ -42,6 +42,11 @@ export class MultiWellPlateComponent {
   currentWell: Well | null = null; // Currently selected single well
   selectedWellsPositions: string = ''; // used for displaying multiple wells selected their ids
 
+  baseCellSize: number = 30; // Base size for cells in pixels
+
+  get cellSize(): number {
+    return this.baseCellSize * this.zoomLevel;
+  }
 
   selectPlate(plateSize: number | undefined): void {
     if (plateSize != 96 && plateSize != 384) {

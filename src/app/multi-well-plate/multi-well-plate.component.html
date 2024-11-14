@@ -42,8 +42,13 @@
       <div class="row header-row">
         <div
           class="cell header-cell"
+          [style.width.px]="cellSize"
+          [style.height.px]="cellSize"
+          [style.lineHeight.px]="cellSize"
+          [style.fontSize.px]="14 * zoomLevel"
           *ngFor="let colHeader of columnHeaders; let colIndex = index"
           (click)="toggleColumnSelection($event, colIndex)"
+
         >
           {{ colHeader }}
         </div>
@@ -57,6 +62,10 @@
       <div class="row-headers">
         <div
           class="row-header"
+          [style.width.px]="cellSize"
+          [style.height.px]="cellSize"
+          [style.lineHeight.px]="cellSize"
+          [style.fontSize.px]="14 * zoomLevel"
           *ngFor="let rowHeader of rowHeaders; let rowIndex = index"
           (click)="toggleRowSelection($event, rowIndex)"
         >
@@ -65,11 +74,14 @@
       </div>
 
       <!-- Scrollable Container -->
-      <div class="scroll-container">
+      <div class="scroll-container"
+           [style.transform]="'scale(' + zoomLevel + ')'"
+           [style.transformOrigin]="'top left'"
+      >
         <!-- Zoom Container -->
         <div
           class="zoom-container"
-          [style.transform]="'scale(' + zoomLevel + ')'"
+          [style.transform]="'scale(' + zoomLevel+ ')'"
           [style.transformOrigin]="'top left'"
         >
           <div *ngIf="wells.length > 0" class="plate-container">
