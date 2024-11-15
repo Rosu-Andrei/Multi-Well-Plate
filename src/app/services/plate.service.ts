@@ -1,18 +1,10 @@
 import {Injectable} from '@angular/core';
 import {Well} from "../model/well";
-import {error} from "@angular/compiler-cli/src/transformers/util";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-/**
- * Manages the setup and structure of the multi-well plate, including row/column headers and well data.
- *
- * This service will be responsible for the rendering of the plate based on the user input,
- * together with the row and column headers.
- */
 export class PlateService {
-
   numberOfWells: number = 0;
   rows: number = 0;
   columns: number = 0;
@@ -20,34 +12,41 @@ export class PlateService {
   columnHeaders: string[] = [];
   wells: Well[][] = [];
 
-  public setupPlate(plateSize: number): void {
-    if (plateSize != 96 && plateSize != 384) {
-      throw error("Unsupported plate size: " + plateSize);
+  setupPlate(plateSize: number): void {
+    if (plateSize !== 96 && plateSize !== 384) {
+      console.error('Unsupported plate size:', plateSize);
+      return;
     }
-
     this.numberOfWells = plateSize;
 
-    if (this.numberOfWells == 96) {
+    if (plateSize === 96) {
       this.rows = 8;
       this.columns = 12;
-    } else if (this.numberOfWells == 384) {
+    } else if (plateSize === 384) {
       this.rows = 16;
       this.columns = 24;
     }
+
+    this.initializeHeaders();
+    this.initializeWells();
   }
 
   private initializeHeaders(): void {
-    for (let i = 0; i < this.rows; i++) {
-      this.rowHeaders.push(`${i + 1}`)
-    }
+    this.rowHeaders = Array.from({length: this.rows}, (_, i) => `${i + 1}`);
 
-    for (let i = 0; i < this.columns; i++) {
-      let letter = String.fromCharCode(i + 65)
-      this.columnHeaders.push(letter)
-    }
+    this.columnHeaders = Array.from({length: this.columns}, (_, i) => {
+      let letters = '';
+      let num = i;
+      while (num >= 0) {
+        letters = String.fromCharCode(65 + (num % 26)) + letters;
+        num = Math.floor(num / 26) - 1;
+      }
+      return letters;
+    });
   }
 
   private initializeWells(): void {
+    this.wells = [];
     for (let row = 0; row < this.rows; row++) {
       const wellRow: Well[] = [];
       for (let column = 0; column < this.columns; column++) {
@@ -70,4 +69,5 @@ export class PlateService {
   getWells(): Well[][] {
     return this.wells;
   }
+
 }
