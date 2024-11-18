@@ -25,20 +25,17 @@
 <!-- Selection Container -->
 <div class="selection-container">
   <p>Select Plate Size:</p>
-  <mat-radio-group [(ngModel)]="numberOfWells" (change)="selectPlate(numberOfWells)">
+  <mat-radio-group [(ngModel)]="plateService.numberOfWells" (change)="selectPlate(plateService.numberOfWells)">
     <mat-radio-button [value]="96">96-Well Plate</mat-radio-button>
     <mat-radio-button [value]="384">384-Well Plate</mat-radio-button>
   </mat-radio-group>
 </div>
-<!-- Main Container for Plate and Side Menu  CHHHH-->
+<!-- Main Container for Plate and Side Menu -->
 <div class="main-container">
-
   <!-- Plate Wrapper -->
   <div class="plate-wrapper">
-
     <!-- Column Headers -->
-    <div class="column-headers zoom-container"
-    >
+    <div class="column-headers zoom-container">
       <div class="row header-row">
         <div
           class="cell header-cell"
@@ -46,9 +43,8 @@
           [style.height.px]="cellSize"
           [style.lineHeight.px]="cellSize"
           [style.fontSize.px]="14 * zoomLevel"
-          *ngFor="let colHeader of columnHeaders; let colIndex = index"
+          *ngFor="let colHeader of plateService.columnHeaders; let colIndex = index"
           (click)="toggleColumnSelection($event, colIndex)"
-
         >
           {{ colHeader }}
         </div>
@@ -57,16 +53,16 @@
 
     <!-- Row Headers and Scrollable Plate Container Wrapper -->
     <div class="plate-and-rows-wrapper">
-
       <!-- Row Headers -->
-      <div class="row-headers">
+      <div class="row-headers" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top center'" >
+
         <div
           class="row-header"
           [style.width.px]="cellSize"
           [style.height.px]="cellSize"
           [style.lineHeight.px]="cellSize"
           [style.fontSize.px]="14 * zoomLevel"
-          *ngFor="let rowHeader of rowHeaders; let rowIndex = index"
+          *ngFor="let rowHeader of plateService.rowHeaders; let rowIndex = index"
           (click)="toggleRowSelection($event, rowIndex)"
         >
           {{ rowHeader }}
@@ -74,32 +70,29 @@
       </div>
 
       <!-- Scrollable Container -->
-      <div class="scroll-container"
-           [style.transform]="'scale(' + zoomLevel + ')'"
-           [style.transformOrigin]="'top left'"
+      <div
+        class="scroll-container"
+        [style.transform]="'scale(' + zoomLevel + ')'"
+        [style.transformOrigin]="'top left'"
       >
         <!-- Zoom Container -->
         <div
           class="zoom-container"
-          [style.transform]="'scale(' + zoomLevel+ ')'"
+          [style.transform]="'scale(' + zoomLevel + ')'"
           [style.transformOrigin]="'top left'"
         >
-          <div *ngIf="wells.length > 0" class="plate-container">
+          <div *ngIf="plateService.wells.length > 0" class="plate-container">
             <!-- Plate Content Wrapper -->
             <div class="plate-content-wrapper">
-              <div class="row" *ngFor="let row of wells; let rowIndex = index">
+              <div class="row" *ngFor="let row of plateService.wells; let rowIndex = index">
                 <!-- Wells -->
                 <div
                   class="cell well-cell"
                   *ngFor="let well of row"
                   (click)="toggleWellSelection($event, well)"
-                  [class.selected]="selection.isSelected(well)"
+                  [class.selected]="selectionService.selection.isSelected(well)"
                 >
-                  <fa-icon
-                    [icon]="faFlask"
-                    class="well-icon"
-                    *ngIf="well.sampleRole"
-                  ></fa-icon>
+                  <fa-icon [icon]="faFlask" class="well-icon" *ngIf="well.sampleRole"></fa-icon>
                   <span class="well-letter" *ngIf="well.sampleRole">
                     {{ well.sampleRole.charAt(0) }}
                   </span>
@@ -107,22 +100,30 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
   </div>
-  <div class="load-btn">
+
+  <div class="load-btn" (click)="load()">
     <button mat-button (click)="load()">Load</button>
   </div>
 
   <!-- Side Menu -->
   <div class="side-menu" *ngIf="menuVisible">
     <div class="menu-header">
-      <button class="tab-btn" [class.active]="activeTab === 'well-settings'" (click)="setActiveTab('well-settings')">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'well-settings'"
+        (click)="setActiveTab('well-settings')"
+      >
         Well Settings
       </button>
-      <button class="tab-btn" [class.active]="activeTab === 'table-view'" (click)="setActiveTab('table-view')">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'table-view'"
+        (click)="setActiveTab('table-view')"
+      >
         Table View
       </button>
     </div>
@@ -132,13 +133,25 @@
       <div *ngIf="activeTab === 'well-settings'">
         <h3>Well Settings</h3>
         <label>Well Position:</label>
-        <input type="text"
-               [value]="currentWell ? currentWell.id : (selection.selected.length > 0 ? selectedWellsPositions : 'None')"
-               readonly/>
+        <input
+          type="text"
+          [value]="
+            currentWell
+              ? currentWell.id
+              : selectionService.selection.selected.length > 0
+              ? selectedWellsPositions
+              : 'None'
+          "
+          readonly
+        />
 
         <label>Sample ID:</label>
-        <input type="text" [(ngModel)]="sampleId" (ngModelChange)="onSampleIdChange($event)"
-               placeholder="Enter Sample ID"/>
+        <input
+          type="text"
+          [(ngModel)]="sampleId"
+          (ngModelChange)="onSampleIdChange($event)"
+          placeholder="Enter Sample ID"
+        />
 
         <label>Sample Role:</label>
         <select [(ngModel)]="sampleRole" (ngModelChange)="onSampleRoleChange($event)">
@@ -158,5 +171,4 @@
       </div>
     </div>
   </div>
-
 </div>
