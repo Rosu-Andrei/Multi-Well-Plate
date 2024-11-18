@@ -54,7 +54,8 @@
     <!-- Row Headers and Scrollable Plate Container Wrapper -->
     <div class="plate-and-rows-wrapper">
       <!-- Row Headers -->
-      <div class="row-headers">
+      <div class="row-headers" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top center'" >
+
         <div
           class="row-header"
           [style.width.px]="cellSize"
