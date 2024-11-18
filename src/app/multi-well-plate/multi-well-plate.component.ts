@@ -60,7 +60,7 @@ export class MultiWellPlateComponent implements OnInit {
     }
     this.plateService.setupPlate(plateSize);
     this.selectionService.clearSelection();
-    this.selectionService.initializeWorker(); // Re-initialize worker with new wells
+    this.selectionService.initializeWorker();
   }
 
   load(): void {
@@ -133,22 +133,33 @@ export class MultiWellPlateComponent implements OnInit {
     this.activeTab = tab;
   }
 
+  /**
+   * this method determines if only a single well has been selected. If it is so,
+   * then the current well will point to this well. If multiple wells are selected or none, then
+   * the current well will receive the null value.
+   *
+   * This method is essential in showing the current selected well position in the readOnly box
+   */
   updateCurrentWellPosition(): void {
-    const selection = this.selectionService.selection;
-    if (selection.selected.length === 1) {
-      this.currentWell = selection.selected[0];
+    const currentSelection = this.selectionService.selection;
+    if (currentSelection.selected.length === 1) {
+      this.currentWell = currentSelection.selected[0];
       this.selectedWellsPositions = this.currentWell.id;
-    } else if (selection.selected.length > 1) {
+    } else if (currentSelection.selected.length > 1) {
       this.currentWell = null;
-      this.selectedWellsPositions = selection.selected
-        .map((well) => well.id)
-        .join(' ');
+      this.selectedWellsPositions = currentSelection.selected.map((well) => well.id).join(' ');
     } else {
       this.currentWell = null;
       this.selectedWellsPositions = '';
     }
   }
 
+  /**
+   * This method is very similar in what it does with the one above. The difference is that,
+   * it displays the sampleID and sampleRole that a selected well has.
+   *
+   * If multiple wells are selected, the window will display "" as the id and Unknown Value as the sample role.
+   */
   updateSampleInfo(): void {
     const array = this.selectionService.selection.selected;
     if (this.currentWell) {
@@ -168,6 +179,12 @@ export class MultiWellPlateComponent implements OnInit {
     }
   }
 
+  /**
+   * When the user enters a sampleId, this method will:
+   * 1. update the component sampleId (because we want to show it updated in the browser)
+   * 2. Each selected well will receive the sampleId entered. (if only one is selected,
+   * the only one will receive it)
+   */
   onSampleIdChange(newSampleId: string): void {
     this.sampleId = newSampleId;
     this.selectionService.selection.selected.forEach((well) => {
@@ -175,6 +192,10 @@ export class MultiWellPlateComponent implements OnInit {
     });
   }
 
+  /**
+   * This method is very similar with the one above, the only difference being that
+   * it is updating the Sample Role property.
+   */
   onSampleRoleChange(newSampleRole: string): void {
     this.sampleRole = newSampleRole;
     this.selectionService.selection.selected.forEach((well) => {

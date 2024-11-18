@@ -32,17 +32,24 @@ export class PlateService {
   }
 
   private initializeHeaders(): void {
-    this.rowHeaders = Array.from({length: this.rows}, (_, i) => `${i + 1}`);
-
-    this.columnHeaders = Array.from({length: this.columns}, (_, i) => {
-      let letters = '';
+    this.rowHeaders = [];
+    for (let i = 0; i < this.rows; i++) {
+      this.rowHeaders.push((i + 1).toString());
+    }
+    this.columnHeaders = [];
+    for (let i = 0; i < this.columns; i++) {
+      let columnName = '';
       let num = i;
+
       while (num >= 0) {
-        letters = String.fromCharCode(65 + (num % 26)) + letters;
-        num = Math.floor(num / 26) - 1;
+        // Get the letter corresponding to the current number
+        const letter = String.fromCharCode(65 + (num % 26)); // 'A' is 65 in ASCII
+        columnName = letter + columnName; // Add the letter to the column name
+        num = Math.floor(num / 26) - 1; // Move to the next "digit"
       }
-      return letters;
-    });
+
+      this.columnHeaders.push(columnName);
+    }
   }
 
   private initializeWells(): void {
