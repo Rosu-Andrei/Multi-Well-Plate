@@ -1,32 +1,35 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {BrowserModule, provideClientHydration} from '@angular/platform-browser';
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { MultiWellPlateComponent } from './multi-well-plate/multi-well-plate.component';
+import {AppRoutingModule} from './app-routing.module';
+import {AppComponent} from './app.component';
+import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
+import {MultiWellPlateComponent} from './multi-well-plate/multi-well-plate.component';
 import {MatRadioModule} from "@angular/material/radio";
 import {FormsModule} from "@angular/forms";
 import {MatButtonToggle} from "@angular/material/button-toggle";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import {DxDataGridModule} from "devextreme-angular";
 
 @NgModule({
   declarations: [
     AppComponent,
     MultiWellPlateComponent
   ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        MatRadioModule,
-        FormsModule,
-        MatButtonToggle,
-        FontAwesomeModule
-    ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    MatRadioModule,
+    FormsModule,
+    MatButtonToggle,
+    FontAwesomeModule,
+    DxDataGridModule
+  ],
   providers: [
     provideClientHydration(),
     provideAnimationsAsync()
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
