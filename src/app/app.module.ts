@@ -10,11 +10,13 @@ import {FormsModule} from "@angular/forms";
 import {MatButtonToggle} from "@angular/material/button-toggle";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {DxDataGridModule} from "devextreme-angular";
+import { PlateTableComponent } from './plate-table/plate-table.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    MultiWellPlateComponent
+    MultiWellPlateComponent,
+    PlateTableComponent
   ],
   imports: [
     BrowserModule,
