@@ -10,7 +10,9 @@ import {FormsModule} from "@angular/forms";
 import {MatButtonToggle} from "@angular/material/button-toggle";
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {DxDataGridModule} from "devextreme-angular";
-import { PlateTableComponent } from './plate-table/plate-table.component';
+import {PlateTableComponent} from './plate-table/plate-table.component';
+import {StoreModule} from "@ngrx/store";
+import {wellReducer} from "./store/well.reducer";
 
 @NgModule({
   declarations: [
@@ -25,7 +27,8 @@ import { PlateTableComponent } from './plate-table/plate-table.component';
     FormsModule,
     MatButtonToggle,
     FontAwesomeModule,
-    DxDataGridModule
+    DxDataGridModule,
+    StoreModule.forRoot({wellState: wellReducer})
   ],
   providers: [
     provideClientHydration(),
