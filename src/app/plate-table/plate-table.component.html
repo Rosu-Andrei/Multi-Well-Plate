@@ -12,10 +12,14 @@
   [rowAlternationEnabled]="true"
   [wordWrapEnabled]="true"
   [allowColumnResizing]="true"
+  [scrolling]="{
+    mode: 'virtual',
+    rowRenderingMode: 'virtual'
+  }"
   class="custom-data-grid"
 >
   <dxi-column dataField="id" caption="Well ID" alignment="center" [width]="100" [fixed]="true"
-              cssClass="centered-cell" [allowEditing]="false" />
+              cssClass="centered-cell" [allowEditing]="false"/>
   <dxi-column dataField="row" caption="Row" alignment="center" [width]="60" [fixed]="true"
               cssClass="centered-cell" [allowEditing]="false" [calculateCellValue]="rowIndex"/>
   <dxi-column dataField="column" caption="Column" alignment="center" [width]="80" [fixed]="true"
