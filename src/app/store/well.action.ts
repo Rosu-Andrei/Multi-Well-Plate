@@ -1,11 +1,6 @@
-import {createAction, props} from "@ngrx/store";
-import {Well} from "../model/well";
+import { createAction, props } from '@ngrx/store';
 
-/**
- * Loads the initial wells into the state
- */
-export const loadWells = createAction("[Well] Load Wells", props<{ wells: Well[] }>());
-/**
- * will update a single well's sampleId or sampleRole.
- */
-export const updateWell = createAction("[Well] Update Well", props<{ well: Well }>());
+export const updateWellSample = createAction(
+  '[Well] Update Well Sample',
+  props<{ wellId: string; sampleId?: string; sampleRole?: string }>()
+);
