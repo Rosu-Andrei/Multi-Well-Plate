@@ -92,9 +92,9 @@
                   (click)="toggleWellSelection($event, well)"
                   [class.selected]="selectionService.selection.isSelected(well)"
                 >
-                  <fa-icon [icon]="faFlask" class="well-icon" *ngIf="well.sampleRole"></fa-icon>
-                  <span class="well-letter" *ngIf="well.sampleRole">
-                    {{ well.sampleRole.charAt(0) }}
+                  <fa-icon [icon]="faFlask" class="well-icon" *ngIf="samples[well.id]?.sampleRole"></fa-icon>
+                  <span class="well-letter" *ngIf="samples[well.id]?.sampleRole">
+                      {{ samples[well.id]?.sampleRole?.charAt(0) || '' }}
                   </span>
                 </div>
               </div>

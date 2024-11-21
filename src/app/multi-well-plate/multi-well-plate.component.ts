@@ -8,6 +8,10 @@ import {
 import {mockWells, Well} from '../model/well';
 import {PlateService} from '../services/plate.service';
 import {WellSelectionService} from '../services/well-selection.service';
+import {Store} from "@ngrx/store";
+import {WellSamplesState} from "../store/well.state";
+import {selectAllSamples} from "../store/well.selectors";
+import {updateWellSample} from "../store/well.action";
 
 @Component({
   selector: 'app-multi-well-plate',
@@ -29,11 +33,12 @@ export class MultiWellPlateComponent implements OnInit {
   selectedWellsPositions: string = ''; // IDs of selected wells
 
   baseCellSize: number = 30; // Base size for cells in pixels
-
+  samples: { [wellId: string]: { sampleId?: string; sampleRole?: string } } = {};
 
   constructor(
     public plateService: PlateService,
-    public selectionService: WellSelectionService
+    public selectionService: WellSelectionService,
+    private store: Store<WellSamplesState>
   ) {
   }
 
@@ -47,6 +52,9 @@ export class MultiWellPlateComponent implements OnInit {
         this.updateSampleInfo();
       }
     );
+    this.store.select(selectAllSamples).subscribe((samples) => {
+      this.samples = samples;
+    });
   }
 
   get cellSize(): number {
@@ -163,14 +171,16 @@ export class MultiWellPlateComponent implements OnInit {
   updateSampleInfo(): void {
     const array = this.selectionService.selection.selected;
     if (this.currentWell) {
-      this.sampleId = this.currentWell.sampleId || '';
-      this.sampleRole = this.currentWell.sampleRole || 'Unknown Sample';
+      const sampleData = this.samples[this.currentWell.id] || {};
+      this.sampleId = sampleData.sampleId || '';
+      this.sampleRole = sampleData.sampleRole || 'Unknown Sample';
     } else {
       this.sampleId = '';
       this.sampleRole = 'Unknown Sample';
       array.forEach((well) => {
-        if (well.sampleId) {
-          this.sampleId += well.sampleId + ' ';
+        const sampleData = this.samples[well.id] || {};
+        if (sampleData.sampleId) {
+          this.sampleId += sampleData.sampleId + ' ';
         }
       });
       if (this.sampleId.trim() === '') {
@@ -188,7 +198,7 @@ export class MultiWellPlateComponent implements OnInit {
   onSampleIdChange(newSampleId: string): void {
     this.sampleId = newSampleId;
     this.selectionService.selection.selected.forEach((well) => {
-      well.sampleId = newSampleId;
+      this.store.dispatch(updateWellSample({wellId: well.id, sampleId: newSampleId}))
     });
   }
 
@@ -199,7 +209,7 @@ export class MultiWellPlateComponent implements OnInit {
   onSampleRoleChange(newSampleRole: string): void {
     this.sampleRole = newSampleRole;
     this.selectionService.selection.selected.forEach((well) => {
-      well.sampleRole = newSampleRole;
+      this.store.dispatch(updateWellSample({wellId: well.id, sampleRole: newSampleRole}))
     });
   }
 }
