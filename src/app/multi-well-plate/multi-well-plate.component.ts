@@ -198,7 +198,7 @@ export class MultiWellPlateComponent implements OnInit {
   onSampleIdChange(newSampleId: string): void {
     this.sampleId = newSampleId;
     this.selectionService.selection.selected.forEach((well) => {
-      this.store.dispatch(updateWellSample({wellId: well.id, sampleId: newSampleId}))
+      this.store.dispatch(updateWellSample({wellId: well.id, changes: {sampleId: newSampleId}}))
     });
   }
 
@@ -209,7 +209,7 @@ export class MultiWellPlateComponent implements OnInit {
   onSampleRoleChange(newSampleRole: string): void {
     this.sampleRole = newSampleRole;
     this.selectionService.selection.selected.forEach((well) => {
-      this.store.dispatch(updateWellSample({wellId: well.id, sampleRole: newSampleRole}))
+      this.store.dispatch(updateWellSample({wellId: well.id, changes: {sampleRole: newSampleRole}}))
     });
   }
 }

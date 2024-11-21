@@ -5,15 +5,15 @@ import {initialState} from "./well.state";
 
 export const wellSamplesReducer = createReducer(
   initialState,
-  on(updateWellSample, (state, {wellId, sampleId, sampleRole}) => {
+  on(updateWellSample, (state, {wellId, changes}) => {
     const existingSample = state.samples[wellId] || {};
     return {
       ...state,
       samples: {
         ...state.samples,
         [wellId]: {
-          sampleId: sampleId !== undefined ? sampleId : existingSample.sampleId,
-          sampleRole: sampleRole !== undefined ? sampleRole : existingSample.sampleRole,
+          ...existingSample,
+          ...changes
         },
       },
     };

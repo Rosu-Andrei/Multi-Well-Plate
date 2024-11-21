@@ -4,7 +4,7 @@ import {updateWellSample} from '../store/well.action';
 import {selectAllSamples} from '../store/well.selectors';
 import {Well} from '../model/well';
 import {PlateService} from '../services/plate.service';
-import {WellSamplesState} from "../store/well.state";
+import {WellSample, WellSamplesState} from "../store/well.state";
 
 
 @Component({
@@ -14,7 +14,7 @@ import {WellSamplesState} from "../store/well.state";
 })
 export class PlateTableComponent implements OnInit {
   wells: Well[] = [];
-  samples: { [wellId: string]: { sampleId?: string; sampleRole?: string } } = {};
+  samples: Record<string, WellSample> = {};
 
   constructor(
     private plateService: PlateService,
@@ -38,10 +38,17 @@ export class PlateTableComponent implements OnInit {
 
   onRowUpdating(event: any): void {
     const wellId = event.oldData.id;
-    const changes = event.newData;
-    const sampleId = changes.sampleId !== undefined ? changes.sampleId : this.samples[wellId]?.sampleId;
-    const sampleRole = changes.sampleRole !== undefined ? changes.sampleRole : this.samples[wellId]?.sampleRole;
-    this.store.dispatch(updateWellSample({ wellId, sampleId, sampleRole }));
+    const changes: Partial<WellSample> = {};
+
+    if (event.newData.sampleId !== undefined) {
+      changes.sampleId = event.newData.sampleId;
+    }
+
+    if (event.newData.sampleRole !== undefined) {
+      changes.sampleRole = event.newData.sampleRole;
+    }
+
+    this.store.dispatch(updateWellSample({wellId, changes}));
   }
 
 }

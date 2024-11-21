@@ -1,5 +1,10 @@
+export interface WellSample {
+  sampleId?: string,
+  sampleRole?: string
+}
+
 export interface WellSamplesState {
-  samples: { [wellId: string]: { sampleId?: string; sampleRole?: string } };
+  samples: Record<string, WellSample>
 }
 
 export const initialState: WellSamplesState = {
