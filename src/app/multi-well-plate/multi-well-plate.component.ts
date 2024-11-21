@@ -9,7 +9,7 @@ import {mockWells, Well} from '../model/well';
 import {PlateService} from '../services/plate.service';
 import {WellSelectionService} from '../services/well-selection.service';
 import {Store} from "@ngrx/store";
-import {WellSamplesState} from "../store/well.state";
+import {WellSample, WellSamplesState} from "../store/well.state";
 import {selectAllSamples} from "../store/well.selectors";
 import {updateWellSample} from "../store/well.action";
 
@@ -33,7 +33,7 @@ export class MultiWellPlateComponent implements OnInit {
   selectedWellsPositions: string = ''; // IDs of selected wells
 
   baseCellSize: number = 30; // Base size for cells in pixels
-  samples: { [wellId: string]: { sampleId?: string; sampleRole?: string } } = {};
+  samples: Record<string, WellSample> = {};
 
   constructor(
     public plateService: PlateService,
@@ -52,6 +52,11 @@ export class MultiWellPlateComponent implements OnInit {
         this.updateSampleInfo();
       }
     );
+    /**
+     * when the page it is initiated, we get all the initial well states form the store. Also, we subscribe to the store so that
+     * any change made (the user has added a sampleId for example) will be intercepted. With this, a sync is maintained between
+     * the plate and the well settings tab.
+     */
     this.store.select(selectAllSamples).subscribe((samples) => {
       this.samples = samples;
     });
@@ -171,7 +176,7 @@ export class MultiWellPlateComponent implements OnInit {
   updateSampleInfo(): void {
     const array = this.selectionService.selection.selected;
     if (this.currentWell) {
-      const sampleData = this.samples[this.currentWell.id] || {};
+      const sampleData = this.samples[this.currentWell.id] || {}; // get the current data of the well using the store
       this.sampleId = sampleData.sampleId || '';
       this.sampleRole = sampleData.sampleRole || 'Unknown Sample';
     } else {
@@ -192,8 +197,7 @@ export class MultiWellPlateComponent implements OnInit {
   /**
    * When the user enters a sampleId, this method will:
    * 1. update the component sampleId (because we want to show it updated in the browser)
-   * 2. Each selected well will receive the sampleId entered. (if only one is selected,
-   * the only one will receive it)
+   * 2. We dispatch a new action to the state storage to update for each selected well with the newly added data.
    */
   onSampleIdChange(newSampleId: string): void {
     this.sampleId = newSampleId;
