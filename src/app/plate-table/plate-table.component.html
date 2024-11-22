@@ -1,6 +1,7 @@
 <dx-data-grid
   [dataSource]="wells"
   (onRowUpdating)="onRowUpdating($event)"
+  (onSelectionChanged)="onSelectionChanged($event)"
   [editing]="{
     mode: 'cell',
     allowUpdating: true
@@ -30,3 +31,7 @@
   <dxi-column dataField="sampleRole" caption="Sample Role" alignment="center" [width]="180" [allowEditing]="true"
               cssClass="centered-cell"/>
 </dx-data-grid>
+
+<button (click)="testSelect()">
+  Test Selection
+</button>
