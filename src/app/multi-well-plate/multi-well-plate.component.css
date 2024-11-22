@@ -319,5 +319,5 @@
 
 .table-view-container {
   width: 100%;
-  overflow-x: auto; /* Allow horizontal scrolling if necessary */
+  overflow-x: auto;
 }

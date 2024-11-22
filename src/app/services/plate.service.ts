@@ -81,12 +81,4 @@ export class PlateService {
     return this.wells.flat();
   }
 
-  updateWell(row: number, column: number, updatedWell: Well): void {
-    this.wells = this.wells.map((currentRow, rowIndex) =>
-      rowIndex === row ?
-        currentRow.map((well, colIndex) => colIndex === column ? { ...well, ...updatedWell } : well)
-        : currentRow
-    );
-  }
-
 }
