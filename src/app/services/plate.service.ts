@@ -77,4 +77,8 @@ export class PlateService {
     return this.wells;
   }
 
+  getFlatWells(): Well[] {
+    return this.wells.flat();
+  }
+
 }

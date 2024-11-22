@@ -54,7 +54,7 @@
     <!-- Row Headers and Scrollable Plate Container Wrapper -->
     <div class="plate-and-rows-wrapper">
       <!-- Row Headers -->
-      <div class="row-headers" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top center'" >
+      <div class="row-headers" [style.transform]="'scale(' + zoomLevel + ')'" [style.transformOrigin]="'top center'">
 
         <div
           class="row-header"
@@ -92,9 +92,9 @@
                   (click)="toggleWellSelection($event, well)"
                   [class.selected]="selectionService.selection.isSelected(well)"
                 >
-                  <fa-icon [icon]="faFlask" class="well-icon" *ngIf="well.sampleRole"></fa-icon>
-                  <span class="well-letter" *ngIf="well.sampleRole">
-                    {{ well.sampleRole.charAt(0) }}
+                  <fa-icon [icon]="faFlask" class="well-icon" *ngIf="samples[well.id]?.sampleRole"></fa-icon>
+                  <span class="well-letter" *ngIf="samples[well.id]?.sampleRole">
+                      {{ samples[well.id]?.sampleRole?.charAt(0) || '' }}
                   </span>
                 </div>
               </div>
@@ -165,9 +165,8 @@
       </div>
 
       <!-- Table View Tab -->
-      <div *ngIf="activeTab === 'table-view'">
-        <h3>Table View</h3>
-        <p>TO DO</p>
+      <div *ngIf="activeTab === 'table-view'" class="table-view-container">
+        <app-plate-table></app-plate-table>
       </div>
     </div>
   </div>

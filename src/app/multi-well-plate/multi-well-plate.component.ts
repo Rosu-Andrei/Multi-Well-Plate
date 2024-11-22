@@ -8,6 +8,10 @@ import {
 import {mockWells, Well} from '../model/well';
 import {PlateService} from '../services/plate.service';
 import {WellSelectionService} from '../services/well-selection.service';
+import {Store} from "@ngrx/store";
+import {WellSample, WellSamplesState} from "../store/well.state";
+import {selectAllSamples} from "../store/well.selectors";
+import {updateWellSample} from "../store/well.action";
 
 @Component({
   selector: 'app-multi-well-plate',
@@ -29,11 +33,12 @@ export class MultiWellPlateComponent implements OnInit {
   selectedWellsPositions: string = ''; // IDs of selected wells
 
   baseCellSize: number = 30; // Base size for cells in pixels
-
+  samples: Record<string, WellSample> = {};
 
   constructor(
     public plateService: PlateService,
-    public selectionService: WellSelectionService
+    public selectionService: WellSelectionService,
+    private store: Store<WellSamplesState>
   ) {
   }
 
@@ -47,6 +52,14 @@ export class MultiWellPlateComponent implements OnInit {
         this.updateSampleInfo();
       }
     );
+    /**
+     * when the page it is initiated, we get all the initial well states form the store. Also, we subscribe to the store so that
+     * any change made (the user has added a sampleId for example) will be intercepted. With this, a sync is maintained between
+     * the plate and the well settings tab.
+     */
+    this.store.select(selectAllSamples).subscribe((samples) => {
+      this.samples = samples;
+    });
   }
 
   get cellSize(): number {
@@ -163,14 +176,16 @@ export class MultiWellPlateComponent implements OnInit {
   updateSampleInfo(): void {
     const array = this.selectionService.selection.selected;
     if (this.currentWell) {
-      this.sampleId = this.currentWell.sampleId || '';
-      this.sampleRole = this.currentWell.sampleRole || 'Unknown Sample';
+      const sampleData = this.samples[this.currentWell.id] || {}; // get the current data of the well using the store
+      this.sampleId = sampleData.sampleId || '';
+      this.sampleRole = sampleData.sampleRole || 'Unknown Sample';
     } else {
       this.sampleId = '';
       this.sampleRole = 'Unknown Sample';
       array.forEach((well) => {
-        if (well.sampleId) {
-          this.sampleId += well.sampleId + ' ';
+        const sampleData = this.samples[well.id] || {};
+        if (sampleData.sampleId) {
+          this.sampleId += sampleData.sampleId + ' ';
         }
       });
       if (this.sampleId.trim() === '') {
@@ -182,13 +197,12 @@ export class MultiWellPlateComponent implements OnInit {
   /**
    * When the user enters a sampleId, this method will:
    * 1. update the component sampleId (because we want to show it updated in the browser)
-   * 2. Each selected well will receive the sampleId entered. (if only one is selected,
-   * the only one will receive it)
+   * 2. We dispatch a new action to the state storage to update for each selected well with the newly added data.
    */
   onSampleIdChange(newSampleId: string): void {
     this.sampleId = newSampleId;
     this.selectionService.selection.selected.forEach((well) => {
-      well.sampleId = newSampleId;
+      this.store.dispatch(updateWellSample({wellId: well.id, changes: {sampleId: newSampleId}}))
     });
   }
 
@@ -199,7 +213,7 @@ export class MultiWellPlateComponent implements OnInit {
   onSampleRoleChange(newSampleRole: string): void {
     this.sampleRole = newSampleRole;
     this.selectionService.selection.selected.forEach((well) => {
-      well.sampleRole = newSampleRole;
+      this.store.dispatch(updateWellSample({wellId: well.id, changes: {sampleRole: newSampleRole}}))
     });
   }
 }
