@@ -70,6 +70,9 @@ addEventListener('message', ({data}) => {
       clearSelection();
       postSelectionUpdate();
       break;
+    case 'updateFromTable':
+      console.log("Nothing");
+      break;
     default:
       console.error('Unknown message type:', message.type);
   }

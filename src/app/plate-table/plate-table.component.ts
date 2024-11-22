@@ -5,6 +5,7 @@ import {selectAllSamples} from '../store/well.selectors';
 import {Well} from '../model/well';
 import {PlateService} from '../services/plate.service';
 import {WellSample, WellSamplesState} from "../store/well.state";
+import {WellSelectionService} from "../services/well-selection.service";
 
 
 @Component({
@@ -15,11 +16,12 @@ import {WellSample, WellSamplesState} from "../store/well.state";
 export class PlateTableComponent implements OnInit {
     wells: Well[] = [];
     samples: Record<string, WellSample> = {};
-    selectedWellIds: Well[] = [];
+    selectedWells: Well[] = [];
 
     constructor(
         private plateService: PlateService,
-        private store: Store<WellSamplesState>
+        private store: Store<WellSamplesState>,
+        private selectionService: WellSelectionService
     ) {
     }
 
@@ -46,7 +48,7 @@ export class PlateTableComponent implements OnInit {
      * a new action is triggered that will update the state store.
      */
     onRowUpdating(event: any): void {
-        const isMultipleSelection = this.selectedWellIds.length > 1;
+        const isMultipleSelection = this.selectedWells.length > 1;
         const changes: Partial<WellSample> = {};
 
         if (event.newData.sampleId !== undefined) {
@@ -57,25 +59,36 @@ export class PlateTableComponent implements OnInit {
             changes.sampleRole = event.newData.sampleRole;
         }
 
+        /**
+         * if multiple rows are selected, then each of the rows will get the newly sampleID and / or sampleRole
+         */
         if (isMultipleSelection) {
             // Apply changes to all selected wells
-            this.selectedWellIds.forEach((wellData) => {
+            this.selectedWells.forEach((wellData) => {
                 let wellId = wellData.id;
                 this.store.dispatch(updateWellSample({wellId, changes: changes}));
             });
         } else {
-            // Apply changes to the single row being updated
             const wellId = event.oldData.id;
             this.store.dispatch(updateWellSample({wellId, changes: changes}));
         }
     }
 
+    /**
+     * this method is used to get the current rows selected at a given time.
+     */
     onSelectionChanged(event: any): void {
-        this.selectedWellIds = event.selectedRowKeys;
+        this.selectedWells = event.selectedRowKeys;
+        const selectedWellsId = this.selectedWells.map(well => well.id);
+        this.updatePlateSelection(selectedWellsId);
     }
 
-    testSelect() {
-        this.selectedWellIds.forEach(well => console.log(well.sampleId))
+    /**
+     * this method is going to send to the wellSelectService the wells that have been selected using the table.
+     */
+    updatePlateSelection(wellIds: string[]): void {
+        const selectedWells = this.plateService.getFlatWells().filter(well => wellIds.includes(well.id));
+        this.selectionService.updateSelectionFromTable(selectedWells);
     }
 
 }

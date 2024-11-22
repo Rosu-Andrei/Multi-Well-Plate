@@ -129,4 +129,16 @@ export class WellSelectionService {
   isSelected(well: Well): boolean {
     return this.selection.isSelected(well);
   }
+
+  /**
+   * we receive from the table the wells that have been selected. We extract their ids and we
+   * send those ids to the web worker.
+   */
+  updateSelectionFromTable(selectedWells: Well[]): void {
+    this.selection.clear();
+    this.selection.select(...selectedWells);
+
+    const selectedWellIds = selectedWells.map(well => well.id);
+    this.worker.postMessage({type: "updateFromTable", payload: selectedWellIds})
+  }
 }
