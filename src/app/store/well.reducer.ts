@@ -23,7 +23,11 @@ export const wellSamplesReducer = createReducer(
         ...state.samples,
         [wellId]: {
           ...existingSample,
-          ...changes
+          ...changes,
+          /**
+           * if th
+           */
+          targetNames: changes.targetNames ? [...changes.targetNames] : existingSample.targetNames
         },
       },
     };

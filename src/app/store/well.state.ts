@@ -2,9 +2,9 @@
  * structure for the sampleId and sampleRole
  */
 export interface WellSample {
-  sampleId?: string,
-  sampleRole?: string,
-  targetName?: string
+  sampleId?: string;
+  sampleRole?: string;
+  targetNames?: string[];
 }
 
 /**

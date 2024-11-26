@@ -17,6 +17,7 @@ export class PlateTableComponent implements OnInit {
   wells: Well[] = [];
   samples: Record<string, WellSample> = {};
   selectedWells: Well[] = [];
+  wellsForTable: Well[] = [];
 
   constructor(
     private plateService: PlateService,
@@ -32,12 +33,30 @@ export class PlateTableComponent implements OnInit {
   ngOnInit(): void {
     this.store.select(selectAllSamples).subscribe((samples) => {
       this.samples = samples;
-      this.wells = this.plateService.getFlatWells().map((well) => ({
-        ...well,
-        sampleId: samples[well.id]?.sampleId,
-        sampleRole: samples[well.id]?.sampleRole,
-        targetName: samples[well.id]?.targetName
-      }));
+      this.wellsForTable = [];
+
+      this.plateService.getFlatWells().forEach((well) => {
+        const sampleData = samples[well.id] || {};
+        const targetNames = sampleData.targetNames || [];
+
+        if (targetNames.length > 0) {
+          targetNames.forEach((targetName) => {
+            this.wellsForTable.push({
+              ...well,
+              sampleId: sampleData.sampleId,
+              sampleRole: sampleData.sampleRole,
+              targetName: targetName, // Single target name for this row
+            });
+          });
+        } else {
+          this.wellsForTable.push({
+            ...well,
+            sampleId: sampleData.sampleId,
+            sampleRole: sampleData.sampleRole,
+            targetName: '', // No target name
+          });
+        }
+      });
     });
   }
 
@@ -51,6 +70,7 @@ export class PlateTableComponent implements OnInit {
   onRowUpdating(event: any): void {
     const isMultipleSelection = this.selectedWells.length > 1;
     const changes: Partial<WellSample> = {};
+    const wellId = event.oldData.id;
 
     if (event.newData.sampleId !== undefined) {
       changes.sampleId = event.newData.sampleId;
@@ -61,7 +81,21 @@ export class PlateTableComponent implements OnInit {
     }
 
     if (event.newData.targetName !== undefined) {
-      changes.targetName = event.newData.targetName;
+      const oldTargetName = event.oldData.targetName;
+      const newTargetName = event.newData.targetName;
+
+      const sampleData = this.samples[wellId] || {};
+      let targetNames = sampleData.targetNames ? [...sampleData.targetNames] : [];
+
+      // Replace the old target name with the new one
+      const index = targetNames.indexOf(oldTargetName);
+      if (index !== -1) {
+        targetNames[index] = newTargetName;
+      } else {
+        targetNames.push(newTargetName);
+      }
+
+      changes.targetNames = targetNames.slice(0, 7); // Limit to 7
     }
 
     /**
