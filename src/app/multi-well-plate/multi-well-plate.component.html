@@ -162,7 +162,15 @@
           <option value="Positive Template Control">Positive Template Control</option>
           <option value="Quantitation Standard">Quantitation Standard</option>
         </select>
+        <label>Target Name:</label>
+        <input
+          type="text"
+          [(ngModel)]="targetName"
+          (ngModelChange)="onTargetNameChange($event)"
+          placeholder="Enter Target Name"
+        />
       </div>
+
 
       <!-- Table View Tab -->
       <div *ngIf="activeTab === 'table-view'" class="table-view-container">

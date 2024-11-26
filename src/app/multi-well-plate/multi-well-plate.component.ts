@@ -29,6 +29,7 @@ export class MultiWellPlateComponent implements OnInit {
   activeTab: string = 'well-settings'; // Default active tab
   sampleId: string = ''; // Default sample ID
   sampleRole: string = 'Unknown Sample'; // Default sample role
+  targetName: string = '';
   currentWell: Well | null = null; // Currently selected single well
   selectedWellsPositions: string = ''; // IDs of selected wells
 
@@ -179,9 +180,11 @@ export class MultiWellPlateComponent implements OnInit {
       const sampleData = this.samples[this.currentWell.id] || {}; // get the current data of the well using the store
       this.sampleId = sampleData.sampleId || '';
       this.sampleRole = sampleData.sampleRole || 'Unknown Sample';
+      this.targetName = sampleData.targetName || '';
     } else {
       this.sampleId = '';
       this.sampleRole = 'Unknown Sample';
+      this.targetName = '';
       array.forEach((well) => {
         const sampleData = this.samples[well.id] || {};
         if (sampleData.sampleId) {
@@ -214,6 +217,13 @@ export class MultiWellPlateComponent implements OnInit {
     this.sampleRole = newSampleRole;
     this.selectionService.selection.selected.forEach((well) => {
       this.store.dispatch(updateWellSample({wellId: well.id, changes: {sampleRole: newSampleRole}}))
+    });
+  }
+
+  onTargetNameChange(newTargetName: string) {
+    this.targetName = newTargetName;
+    this.selectionService.selection.selected.forEach((well) => {
+      this.store.dispatch(updateWellSample({wellId: well.id, changes: {targetName: newTargetName}}))
     });
   }
 }

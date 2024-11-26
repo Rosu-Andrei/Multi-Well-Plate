@@ -3,7 +3,8 @@
  */
 export interface WellSample {
   sampleId?: string,
-  sampleRole?: string
+  sampleRole?: string,
+  targetName?: string
 }
 
 /**
