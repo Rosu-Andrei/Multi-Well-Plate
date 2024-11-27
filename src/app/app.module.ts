@@ -13,6 +13,10 @@ import {DxDataGridModule} from "devextreme-angular";
 import {PlateTableComponent} from './plate-table/plate-table.component';
 import {StoreModule} from "@ngrx/store";
 import {wellSamplesReducer} from "./store/well.reducer";
+import * as PlotlyJS from 'plotly.js-dist-min';
+import {PlotlyModule} from 'angular-plotly.js';
+
+PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
   declarations: [
