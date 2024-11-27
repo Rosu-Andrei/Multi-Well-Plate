@@ -1,5 +1,6 @@
 <dx-data-grid
   [dataSource]="wellsForTable"
+  [keyExpr]="'rowKey'"
   (onRowUpdating)="onRowUpdating($event)"
   (onSelectionChanged)="onSelectionChanged($event)"
   [editing]="{
@@ -20,16 +21,57 @@
   }"
   class="custom-data-grid"
 >
-  <dxi-column dataField="id" caption="Well ID" alignment="center" [width]="100" [fixed]="true"
-              cssClass="centered-cell" [allowEditing]="false"/>
-  <dxi-column dataField="row" caption="Row" alignment="center" [width]="60" [fixed]="true"
-              cssClass="centered-cell" [allowEditing]="false" [calculateCellValue]="rowIndex"/>
-  <dxi-column dataField="column" caption="Column" alignment="center" [width]="80" [fixed]="true"
-              cssClass="centered-cell" [allowEditing]="false" [calculateCellValue]="columnIndex"/>
-  <dxi-column dataField="sampleId" caption="Sample ID" alignment="center" [width]="150" [allowEditing]="true"
-              cssClass="centered-cell"/>
-  <dxi-column dataField="targetName" caption="Target Name" alignment="center" [width]="150" [allowEditing]="true"
-              cssClass="centered-cell"/>
-  <dxi-column dataField="sampleRole" caption="Sample Role" alignment="center" [width]="180" [allowEditing]="true"
-              cssClass="centered-cell"/>
+  <dxi-column
+    dataField="id"
+    caption="Well ID"
+    alignment="center"
+    [width]="100"
+    [fixed]="true"
+    cssClass="centered-cell"
+    [allowEditing]="false"
+  ></dxi-column>
+  <dxi-column
+    dataField="row"
+    caption="Row"
+    alignment="center"
+    [width]="60"
+    [fixed]="true"
+    cssClass="centered-cell"
+    [allowEditing]="false"
+    [calculateCellValue]="rowIndex"
+  ></dxi-column>
+  <dxi-column
+    dataField="column"
+    caption="Column"
+    alignment="center"
+    [width]="80"
+    [fixed]="true"
+    cssClass="centered-cell"
+    [allowEditing]="false"
+    [calculateCellValue]="columnIndex"
+  ></dxi-column>
+  <dxi-column
+    dataField="sampleId"
+    caption="Sample ID"
+    alignment="center"
+    [width]="150"
+    [allowEditing]="true"
+    cssClass="centered-cell"
+  ></dxi-column>
+  <dxi-column
+    dataField="targetName"
+    caption="Target Name"
+    alignment="center"
+    [width]="150"
+    [allowEditing]="true"
+    cssClass="centered-cell"
+  ></dxi-column>
+  <dxi-column
+    dataField="sampleRole"
+    caption="Sample Role"
+    alignment="center"
+    [width]="180"
+    [allowEditing]="true"
+    cssClass="centered-cell"
+  ></dxi-column>
 </dx-data-grid>
