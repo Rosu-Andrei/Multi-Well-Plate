@@ -24,7 +24,6 @@ export class WellSelectionService {
 
   constructor(private plateService: PlateService) {
     if (typeof Worker !== 'undefined') {
-      // Create a new web worker
       this.worker = new Worker(
         new URL('../well-selection.worker.ts', import.meta.url),
         {type: 'module'}
