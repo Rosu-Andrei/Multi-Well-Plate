@@ -17,7 +17,7 @@ export class PlateTableComponent implements OnInit {
   wells: Well[] = [];
   samples: Record<string, WellSample> = {};
   selectedWells: Well[] = [];
-  wellsForTable: Well[] = [];
+  wellsForTable: Well[] = []; // holds the wells data formatted for the table.
 
   constructor(
     private plateService: PlateService,
@@ -33,19 +33,22 @@ export class PlateTableComponent implements OnInit {
   ngOnInit(): void {
     this.store.select(selectAllSamples).subscribe((samples) => {
       this.samples = samples;
-      this.wellsForTable = [];
+      this.wellsForTable = []; // on initialization, we reset the table data.
 
       this.plateService.getFlatWells().forEach((well) => {
         const sampleData = samples[well.id] || {};
         const targetNames = sampleData.targetNames || [];
 
+        /**
+         * here we create a separate row for each target name a well has
+         */
         if (targetNames.length > 0) {
           targetNames.forEach((targetName) => {
             this.wellsForTable.push({
               ...well,
               sampleId: sampleData.sampleId,
               sampleRole: sampleData.sampleRole,
-              targetName: targetName, // Single target name for this row
+              targetName: targetName,
             });
           });
         } else {
@@ -53,7 +56,7 @@ export class PlateTableComponent implements OnInit {
             ...well,
             sampleId: sampleData.sampleId,
             sampleRole: sampleData.sampleRole,
-            targetName: '', // No target name
+            targetName: '',
           });
         }
       });

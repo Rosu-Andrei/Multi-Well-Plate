@@ -25,7 +25,8 @@ export const wellSamplesReducer = createReducer(
           ...existingSample,
           ...changes,
           /**
-           * if th
+           * if the targetNames field has been updated, we use the new data (that was either added or removed). If no modification
+           * took place, we use the same data already.
            */
           targetNames: changes.targetNames ? [...changes.targetNames] : existingSample.targetNames
         },

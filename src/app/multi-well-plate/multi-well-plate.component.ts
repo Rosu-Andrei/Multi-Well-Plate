@@ -29,7 +29,7 @@ export class MultiWellPlateComponent implements OnInit {
   activeTab: string = 'well-settings'; // Default active tab
   sampleId: string = ''; // Default sample ID
   sampleRole: string = 'Unknown Sample'; // Default sample role
-  targetNames: string = '';
+  targetNames: string = ''; // This variable stores all the targetNames of a well separated by comma.
   currentWell: Well | null = null; // Currently selected single well
   selectedWellsPositions: string = ''; // IDs of selected wells
 
@@ -220,6 +220,11 @@ export class MultiWellPlateComponent implements OnInit {
     });
   }
 
+  /**
+   * When the user parses one or multiple targetNames with comma in the well-settings tab,
+   * this method will take those new values and will put them all in an array.
+   * The array then is sent to the state store for update.
+   */
   onTargetNameChange(newTargetNames: string) {
     this.targetNames = newTargetNames;
     const targetNamesArray = newTargetNames.split(',').map(name => name.trim()).slice(0, 7);
