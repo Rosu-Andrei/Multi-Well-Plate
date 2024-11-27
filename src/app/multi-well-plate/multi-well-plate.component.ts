@@ -77,39 +77,40 @@ export class MultiWellPlateComponent implements OnInit {
     this.selectionService.initializeWorker();
   }
 
+  /**
+   * this functions extracts well data from an array with the values already predefined. Each well inside the array
+   * has its data synchronised with the well plate, well settings and table view.
+   */
   load(): void {
     this.selectionService.clearSelection();
-    mockWells.forEach((well) => {
-      const columnChar = well.id.charAt(0);
-      const rowStr = well.id.slice(1);
 
-      if (!columnChar || !rowStr) {
-        console.error(`Invalid well ID: ${well.id}`);
-        return;
+    mockWells.forEach((mockWell) => {
+
+      /**
+       * for each well from the mockArray, we extract the data a well has.
+       */
+      const wellId = mockWell.id;
+      const sampleId = mockWell.sampleId;
+      const sampleRole = mockWell.sampleRole;
+      const targetNames = mockWell.targetName ? mockWell.targetName.split(',').map(name => name.trim()).slice(0, 7) : [];
+
+      const well = this.plateService.getFlatWells().find(w => w.id === wellId);
+      /**
+       * if the well is undefined, it means that the wellID we used for the finding doesn't exist on the current plate.
+       */
+      if (well) {
+        this.store.dispatch(updateWellSample({
+          wellId: well.id,
+          changes: {
+            sampleId: sampleId,
+            sampleRole: sampleRole,
+            targetNames: targetNames
+          }
+        }));
+
+      } else {
+        console.error(`Well ID ${wellId} not found on the current plate.`);
       }
-
-      const columnIndex = columnChar.charCodeAt(0) - 65;
-      const rowIndex = parseInt(rowStr, 10) - 1;
-
-      if (
-        rowIndex < 0 ||
-        rowIndex >= this.plateService.rows ||
-        columnIndex < 0 ||
-        columnIndex >= this.plateService.columns
-      ) {
-        console.error(
-          `Well ID ${well.id} is out of bounds for the current plate size (${this.plateService.rows} rows x ${this.plateService.columns} columns).`
-        );
-        return;
-      }
-      const selectedWell = this.plateService.getWells()[rowIndex][columnIndex];
-      // Simulate a selection event
-      const event = {
-        ctrlKey: true,
-        metaKey: true,
-        shiftKey: false,
-      } as MouseEvent;
-      this.selectionService.toggleWellSelection(event, selectedWell);
     });
   }
 
