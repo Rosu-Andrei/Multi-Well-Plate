@@ -61,6 +61,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  margin-bottom: 20px;
 }
 
 
@@ -320,4 +321,13 @@
 .table-view-container {
   width: 100%;
   overflow-x: auto;
+}
+
+.chart-wraper {
+  margin-top: 20px; /* Adds space above the chart */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

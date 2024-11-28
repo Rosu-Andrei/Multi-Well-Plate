@@ -1,12 +1,12 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Well} from '../model/well';
-import {PlateService} from '../services/plate.service';
-import {WellSample, WellSamplesState} from '../store/well.state';
-import {WellSelectionService} from '../services/well-selection.service';
+import {Well} from '../../model/well';
+import {PlateService} from '../../services/plate.service';
+import {WellSample, WellSamplesState} from '../../store/well.state';
+import {WellSelectionService} from '../../services/well-selection.service';
 import {DxDataGridComponent} from 'devextreme-angular';
-import {updateWellSample} from "../store/well.action";
-import {selectAllSamples} from "../store/well.selectors";
+import {updateWellSample} from "../../store/well.action";
+import {selectAllSamples} from "../../store/well.selectors";
 
 
 /**
@@ -97,7 +97,7 @@ export class PlateTableComponent implements OnInit {
   }
 
   /**
-   * these two idexes are used for the display of the row and column identical with that of the plate.
+   * these two indexes are used for the display of the row and column identical with that of the plate.
    */
   rowIndex = (data: any) => data.row + 1;
   columnIndex = (data: any) => String.fromCharCode(data.column + 65);

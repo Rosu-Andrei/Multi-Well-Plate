@@ -5,13 +5,13 @@ import {
   faSearchMinus,
   faSearchPlus,
 } from '@fortawesome/free-solid-svg-icons';
-import {mockWells, Well} from '../model/well';
-import {PlateService} from '../services/plate.service';
-import {WellSelectionService} from '../services/well-selection.service';
+import {mockWells, Well} from '../../model/well';
+import {PlateService} from '../../services/plate.service';
+import {WellSelectionService} from '../../services/well-selection.service';
 import {Store} from "@ngrx/store";
-import {WellSample, WellSamplesState} from "../store/well.state";
-import {selectAllSamples} from "../store/well.selectors";
-import {updateWellSample} from "../store/well.action";
+import {WellSample, WellSamplesState} from "../../store/well.state";
+import {selectAllSamples} from "../../store/well.selectors";
+import {updateWellSample} from "../../store/well.action";
 
 @Component({
   selector: 'app-multi-well-plate',
@@ -35,6 +35,12 @@ export class MultiWellPlateComponent implements OnInit {
 
   baseCellSize: number = 30; // Base size for cells in pixels
   samples: Record<string, WellSample> = {};
+
+  isChartVisible: boolean = false;
+
+  toggleChart(): void {
+    this.isChartVisible = !this.isChartVisible;
+  }
 
   constructor(
     public plateService: PlateService,
