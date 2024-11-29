@@ -73,6 +73,14 @@ addEventListener('message', ({data}) => {
     case 'updateFromTable':
       console.log("Nothing");
       break;
+    case 'selectWellById':
+      selectWellById(message.payload.wellId);
+      postSelectionUpdate();
+      break;
+    case 'deselect':
+      clearSelection();
+      postSelectionUpdate();
+      break;
     default:
       console.error('Unknown message type:', message.type);
   }
@@ -171,6 +179,11 @@ function toggleColumnSelection(payload: any): void {
 function clearSelection(): void {
   selectedWellIds.clear();
   lastSelectedWell = null;
+}
+
+function selectWellById(wellId: string): void {
+  selectedWellIds.clear();
+  selectedWellIds.add(wellId);
 }
 
 /**

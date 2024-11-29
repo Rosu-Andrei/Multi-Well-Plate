@@ -140,4 +140,19 @@ export class WellSelectionService {
     const selectedWellIds = selectedWells.map(well => well.id);
     this.worker.postMessage({type: "updateFromTable", payload: selectedWellIds})
   }
+
+  selectWellById(wellId: string): void {
+    if (wellId !== 'deselect') {
+      this.worker.postMessage({
+        type: 'selectWellById',
+        payload: {wellId},
+      });
+    } else {
+      this.worker.postMessage({
+        type: 'deselect',
+        payload: {wellId},
+      });
+    }
+
+  }
 }

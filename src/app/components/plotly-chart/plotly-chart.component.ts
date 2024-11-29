@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 
 @Component({
   selector: 'app-plotly-chart',
@@ -19,11 +19,13 @@ export class PlotlyChartComponent implements OnChanges {
     },
   };
   private selectedTraceIndex: number | null = null;
+  private traceWellId: string = '';
   /**
    * this represents data that the parent component, in our case the multi-well-plate
    * will send back to the chart component. It represents the data of the chart.
    */
   @Input() chartData: any[] = [];
+  @Output() selectedWell = new EventEmitter<string>();
 
   constructor() {
   }
@@ -52,6 +54,13 @@ export class PlotlyChartComponent implements OnChanges {
      */
     const traceIndex = event.points[0].fullData.index;
 
+    this.traceWellId = event.points[0].fullData.name;
+
+    const wellId = this.traceWellId.slice(0, 2);
+    console.log(wellId);
+    this.selectedWell.emit(wellId);
+
+
     /**
      * here we check if the trace is already selected. If yes, this means that the user
      * has clicked on it again while it was selected and that means that we have to unselect it.
@@ -79,6 +88,7 @@ export class PlotlyChartComponent implements OnChanges {
       if (this.selectedTraceIndex === null) {
         trace.line.opacity = 1;
         trace.line.width = 2;
+        this.selectedWell.emit("deselect");
       }
       /**
        * else, it means that the user has selected a specific trace, and we modify the one

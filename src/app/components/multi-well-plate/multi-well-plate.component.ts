@@ -280,7 +280,7 @@ export class MultiWellPlateComponent implements OnInit {
           y: dataItem.y,
           type: 'scattergl',
           mode: 'lines',
-          name: `${dataItem.targetName} (${dataItem.wellId})`,
+          name: `${dataItem.wellId}${dataItem.targetName}`,
           hovertemplate: `<i>Well ID: ${dataItem.wellId}, Target Name: ${dataItem.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`,
           line: {
             width: 2,
@@ -290,5 +290,9 @@ export class MultiWellPlateComponent implements OnInit {
       ;
       this.chartData.push(trace);
     });
+  }
+
+  onWellSelected(wellId: string): void {
+    this.selectionService.selectWellById(wellId);
   }
 }

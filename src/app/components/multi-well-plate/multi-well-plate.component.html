@@ -182,6 +182,6 @@
     </div>
   </div>
   <div class="chart-wraper" *ngIf="isChartVisible">
-    <app-plotly-chart [chartData]="chartData"></app-plotly-chart>
+    <app-plotly-chart [chartData]="chartData" (selectedWell)="onWellSelected($event)"></app-plotly-chart>
   </div>
 </div>
