@@ -276,13 +276,18 @@ export class MultiWellPlateComponent implements OnInit {
     this.chartData = [];
     this.mockChartData.forEach((dataItem) => {
       const trace = {
-        x: dataItem.x,
-        y: dataItem.y,
-        type: 'scattergl',
-        mode: 'lines',
-        name: `${dataItem.targetName} (${dataItem.wellId})`,
-        hovertemplate: `<i>Well ID: ${dataItem.wellId}, Target Name: ${dataItem.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`
-      };
+          x: dataItem.x,
+          y: dataItem.y,
+          type: 'scattergl',
+          mode: 'lines',
+          name: `${dataItem.targetName} (${dataItem.wellId})`,
+          hovertemplate: `<i>Well ID: ${dataItem.wellId}, Target Name: ${dataItem.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`,
+          line: {
+            width: 2,
+            opacity: 1,
+          }
+        }
+      ;
       this.chartData.push(trace);
     });
   }
