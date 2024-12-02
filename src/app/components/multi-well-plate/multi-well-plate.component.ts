@@ -36,6 +36,7 @@ export class MultiWellPlateComponent implements OnInit {
   isChartVisible: boolean = false;
   chartData: any[] = []; // Holds the data to be passed to PlotlyChartComponent
   mockChartData: ChartDataItem[] = []; // Now generated dynamically
+  selectedWellIds: string[] = [];
 
   toggleChart(): void {
     this.isChartVisible = !this.isChartVisible;
@@ -58,6 +59,10 @@ export class MultiWellPlateComponent implements OnInit {
         this.updateSampleInfo();
       }
     );
+
+    this.selectionService.selectedWellIdsSubject.subscribe((wellIds) => {
+      this.selectedWellIds = wellIds;
+    })
     /**
      * when the page it is initiated, we get all the initial well states form the store. Also, we subscribe to the store so that
      * any change made (the user has added a sampleId for example) will be intercepted. With this, a sync is maintained between
@@ -280,7 +285,7 @@ export class MultiWellPlateComponent implements OnInit {
           y: dataItem.y,
           type: 'scattergl',
           mode: 'lines',
-          name: `${dataItem.wellId}${dataItem.targetName}`,
+          name: `${dataItem.wellId}_${dataItem.targetName}`,
           hovertemplate: `<i>Well ID: ${dataItem.wellId}, Target Name: ${dataItem.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`,
           line: {
             width: 2,

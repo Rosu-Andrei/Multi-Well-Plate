@@ -71,7 +71,8 @@ addEventListener('message', ({data}) => {
       postSelectionUpdate();
       break;
     case 'updateFromTable':
-      console.log("Nothing");
+      updateSelectionFromTable(message.payload);
+      postSelectionUpdate();
       break;
     case 'selectWellById':
       selectWellById(message.payload.wellId);
@@ -182,8 +183,16 @@ function clearSelection(): void {
 }
 
 function selectWellById(wellId: string): void {
-  selectedWellIds.clear();
-  selectedWellIds.add(wellId);
+ // selectedWellIds.clear();
+  if (selectedWellIds.has(wellId)) {
+    selectedWellIds.delete(wellId);
+  } else {
+    selectedWellIds.add(wellId);
+  }
+}
+
+function updateSelectionFromTable(selectedWellIdsFromTable: string[]): void {
+  selectedWellIds = new Set(selectedWellIdsFromTable);
 }
 
 /**
