@@ -130,7 +130,7 @@ export class WellSelectionService {
   }
 
   /**
-   * we receive from the table the wells that have been selected. We extract their ids and we
+   * we receive from the table the wells that have been selected. We extract their ids and, we
    * send those ids to the web worker.
    */
   updateSelectionFromTable(selectedWells: Well[]): void {
