@@ -21,6 +21,7 @@ export class WellSelectionService {
    * of wells has changed
    */
   public selectionChangeSubject = new Subject<Well[]>();
+  public tableRowSelectionSubject = new Subject<string>();
 
   constructor(private plateService: PlateService) {
     if (typeof Worker !== 'undefined') {
@@ -142,17 +143,20 @@ export class WellSelectionService {
   }
 
   selectWellById(wellId: string): void {
-    if (wellId !== 'deselect') {
+    if (wellId !== 'clearSelection') {
       this.worker.postMessage({
         type: 'selectWellById',
         payload: {wellId},
       });
     } else {
       this.worker.postMessage({
-        type: 'deselect',
+        type: 'clearSelection',
         payload: {wellId},
       });
     }
+  }
 
+  selectTableRowByKey(rowKey: string): void {
+    this.tableRowSelectionSubject.next(rowKey);
   }
 }

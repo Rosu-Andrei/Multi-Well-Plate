@@ -59,6 +59,17 @@ export class PlateTableComponent implements OnInit {
         this.updateTableSelection(selectedWells);
       }
     );
+    this.selectionService.tableRowSelectionSubject.subscribe((rowKey: string) => {
+      this.selectRowByKey(rowKey);
+    });
+  }
+
+  selectRowByKey(rowKey: string): void {
+    this.isSelectionUpdatingFromPlate = true;
+    this.dataGrid.instance.clearSelection();
+    this.dataGrid.instance.selectRows([rowKey], true).then(() => {
+      this.isSelectionUpdatingFromPlate = false;
+    });
   }
 
   /**
@@ -73,8 +84,8 @@ export class PlateTableComponent implements OnInit {
       const targetNames = sampleData.targetNames || [];
 
       if (targetNames.length > 0) {
-        targetNames.forEach((targetName, index) => {
-          const rowKey = `${well.id}_${index}`; // we create the unique key for each row.
+        targetNames.forEach((targetName) => {
+          const rowKey = `${well.id}_${targetName}`; // we create the unique key for each row.
           this.wellsForTable.push({
             ...well,
             sampleId: sampleData.sampleId,
@@ -84,7 +95,7 @@ export class PlateTableComponent implements OnInit {
           });
         });
       } else {
-        const rowKey = `${well.id}_0`;
+        const rowKey = `${well.id}_NoTarget`;
         this.wellsForTable.push({
           ...well,
           sampleId: sampleData.sampleId,
@@ -101,6 +112,7 @@ export class PlateTableComponent implements OnInit {
    */
   rowIndex = (data: any) => data.row + 1;
   columnIndex = (data: any) => String.fromCharCode(data.column + 65);
+
   /**
    * This method receives the array that contains the wells that have been selected in the plate by the user. Using them,
    * we select the corresponding rows in the table.

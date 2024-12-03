@@ -19,7 +19,6 @@ export class PlotlyChartComponent implements OnChanges {
     },
   };
   private selectedTraceIndex: number | null = null;
-  private traceWellId: string = '';
   /**
    * this represents data that the parent component, in our case the multi-well-plate
    * will send back to the chart component. It represents the data of the chart.
@@ -53,12 +52,13 @@ export class PlotlyChartComponent implements OnChanges {
      *
      */
     const traceIndex = event.points[0].fullData.index;
+    const trace = event.points[0].fullData;
+    const fullTraceName = trace.name;
+    const [wellId, targetName] = fullTraceName.split('_');
 
-    this.traceWellId = event.points[0].fullData.name;
+    const rowKey = `${wellId}_${targetName}`;
 
-    const wellId = this.traceWellId.slice(0, 2);
-    console.log(wellId);
-    this.selectedWell.emit(wellId);
+    this.selectedWell.emit(rowKey);
 
 
     /**
@@ -88,7 +88,7 @@ export class PlotlyChartComponent implements OnChanges {
       if (this.selectedTraceIndex === null) {
         trace.line.opacity = 1;
         trace.line.width = 2;
-        this.selectedWell.emit("deselect");
+        this.selectedWell.emit("clearSelection");
       }
       /**
        * else, it means that the user has selected a specific trace, and we modify the one

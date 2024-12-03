@@ -77,10 +77,6 @@ addEventListener('message', ({data}) => {
       selectWellById(message.payload.wellId);
       postSelectionUpdate();
       break;
-    case 'deselect':
-      clearSelection();
-      postSelectionUpdate();
-      break;
     default:
       console.error('Unknown message type:', message.type);
   }
@@ -182,8 +178,14 @@ function clearSelection(): void {
 }
 
 function selectWellById(wellId: string): void {
-  selectedWellIds.clear();
-  selectedWellIds.add(wellId);
+  console.log(`Web Worker: Selecting wellId ${wellId}`);
+  const well = wells.flat().find(w => w.id === wellId);
+  if (well) {
+    selectedWellIds.add(wellId);
+    console.log(`Web Worker: WellId ${wellId} added to selectedWellIds`);
+  } else {
+    console.error(`Web Worker: Well with ID ${wellId} not found.`);
+  }
 }
 
 /**

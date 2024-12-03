@@ -280,7 +280,7 @@ export class MultiWellPlateComponent implements OnInit {
           y: dataItem.y,
           type: 'scattergl',
           mode: 'lines',
-          name: `${dataItem.wellId}${dataItem.targetName}`,
+          name: `${dataItem.wellId}_${dataItem.targetName}`,
           hovertemplate: `<i>Well ID: ${dataItem.wellId}, Target Name: ${dataItem.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`,
           line: {
             width: 2,
@@ -292,7 +292,16 @@ export class MultiWellPlateComponent implements OnInit {
     });
   }
 
-  onWellSelected(wellId: string): void {
-    this.selectionService.selectWellById(wellId);
+  onWellSelected(rowKey: string): void {
+    if (rowKey === 'clearSelection') {
+      this.selectionService.clearSelection();
+    } else {
+      this.selectionService.selectTableRowByKey(rowKey);
+
+      const [wellId, targetName] = rowKey.split('_');
+      //this.selectionService.selectWellById(wellId);
+    }
   }
+
+
 }
