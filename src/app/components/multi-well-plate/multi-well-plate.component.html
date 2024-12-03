@@ -33,6 +33,7 @@
     <mat-radio-button [value]="384">384-Well Plate</mat-radio-button>
   </mat-radio-group>
 </div>
+
 <!-- Main Container for Plate and Side Menu -->
 <div class="main-container">
   <!-- Plate Wrapper -->
@@ -174,17 +175,18 @@
         />
       </div>
 
-
       <!-- Table View Tab -->
       <div *ngIf="activeTab === 'table-view'" class="table-view-container">
         <app-plate-table></app-plate-table>
       </div>
     </div>
   </div>
-  <div class="chart-wraper" *ngIf="isChartVisible">
-    <app-plotly-chart [chartData]="chartData"
-                      (selectedWell)="onWellSelected($event)"
-                      [selectedWellIds]="selectedWellIds"
-    ></app-plotly-chart>
-  </div>
+</div>
+
+<!-- Chart Wrapper moved outside the main-container to appear below -->
+<div class="chart-wraper" *ngIf="isChartVisible">
+  <app-plotly-chart [chartData]="chartData"
+                    (selectedWell)="onWellSelected($event)"
+                    [selectedWellIds]="selectedWellIds"
+  ></app-plotly-chart>
 </div>
