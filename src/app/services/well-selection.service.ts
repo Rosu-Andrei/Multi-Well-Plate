@@ -184,16 +184,19 @@ export class WellSelectionService {
   }
 
   private updateTableFromRowKey(selectedRowKeys: string[]) {
+    this.selection.clear();
+    const selectedWells: Well[] = [];
+
     selectedRowKeys.forEach(rowKey => {
       this.tableRowSelectionSubject.next(rowKey);
+      const [wellId, targetName] = rowKey.split('_');
+      const selectedWell = this.plateService.getFlatWells().find(well => well.id === wellId);
+      if (selectedWell) {
+        selectedWells.push(selectedWell);
+      }
     });
-    selectedRowKeys.forEach(rowKey => {
-      let [wellId, targetName] = rowKey.split('_');
-      this.selection.clear();
-      const selectedWell = this.plateService.getFlatWells().filter(well => {
-        return well.id == wellId;
-      });
-      this.selection.select(...selectedWell);
-    });
+
+    this.selection.select(...selectedWells);
   }
+
 }

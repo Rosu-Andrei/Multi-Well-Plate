@@ -184,6 +184,7 @@ function toggleColumnSelection(payload: any): void {
 function clearSelection(): void {
   selectedWellIds.clear();
   lastSelectedWell = null;
+  selectedRowKeys.clear();
 }
 
 function updatePlateFromTable(payload: string[]): void {
@@ -209,6 +210,7 @@ function selectRowByRowKey(rowKey: string) {
   console.log(`The wellId from the trace is ${wellId}`);
   console.log(`The targetName from the trace is ${targetName}`);
   if (rowKey) {
+    selectedRowKeys.clear();
     selectedRowKeys.add(rowKey);
   }
 }
