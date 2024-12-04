@@ -148,7 +148,7 @@ export class PlateTableComponent implements OnInit {
     }
 
     this.selectedWells = event.selectedRowKeys
-      .map((key: string) => this.wellsForTable.find((row) => row.rowKey === key))
+      .map((key: string) => this.wellsForTable.find((well) => well.rowKey === key))
       .filter(Boolean) as WellTableRow[];
 
     const selectedWellIds = this.selectedWells.map((well) => well.id);
@@ -161,8 +161,8 @@ export class PlateTableComponent implements OnInit {
   updatePlateSelection(wellIds: string[]): void {
     const selectedWells = this.plateService
       .getFlatWells()
-      .filter((well) => wellIds.includes(well.id));
-    this.selectionService.updateSelectionFromTable(selectedWells);
+      .filter((well) => wellIds.includes(well.id)); // filter the plate wells
+    this.selectionService.selectionFromTable(selectedWells);
   }
 
   /**

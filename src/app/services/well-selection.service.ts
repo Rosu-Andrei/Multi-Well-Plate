@@ -22,6 +22,7 @@ export class WellSelectionService {
    */
   public selectionChangeSubject = new Subject<Well[]>();
   public tableRowSelectionSubject = new Subject<string>();
+  public chartSelectionSubject = new Subject<string>();
 
   constructor(private plateService: PlateService) {
     if (typeof Worker !== 'undefined') {
@@ -44,6 +45,8 @@ export class WellSelectionService {
          */
         if (message.type === 'selectionUpdate') {
           this.updateSelectionModel(message.payload);
+        } else if (message.type === 'selectionUpdateFromTable') {
+          this.updateSelectionFromTable(message.payload);
         }
       };
       /**
@@ -131,13 +134,10 @@ export class WellSelectionService {
   }
 
   /**
-   * we receive from the table the wells that have been selected. We extract their ids and, we
-   * send those ids to the web worker.
+   * we receive from the table component the wells that have been selected.
+   * We extract their ids and, we end those ids to the web worker.
    */
-  updateSelectionFromTable(selectedWells: Well[]): void {
-    this.selection.clear();
-    this.selection.select(...selectedWells);
-
+  selectionFromTable(selectedWells: Well[]): void {
     const selectedWellIds = selectedWells.map(well => well.id);
     this.worker.postMessage({type: "updateFromTable", payload: selectedWellIds})
   }
@@ -158,5 +158,19 @@ export class WellSelectionService {
 
   selectTableRowByKey(rowKey: string): void {
     this.tableRowSelectionSubject.next(rowKey);
+    this.chartSelectionSubject.next(rowKey);
+  }
+
+  updateSelectionFromTable(selectedWellsIds: string[]): void {
+    const selectedWells = this.plateService.getWells().flat().filter((well) => {
+        return selectedWellsIds.includes(well.id);
+      }
+    );
+    /**
+     * First we clear all the selected wells from the SelectionModule object, and then we tell it to select only
+     * the wells that are in the newly created array.
+     */
+    this.selection.clear();
+    this.selection.select(...selectedWells);
   }
 }

@@ -66,6 +66,11 @@ export class MultiWellPlateComponent implements OnInit {
     this.store.select(selectAllSamples).subscribe((samples) => {
       this.samples = samples;
     });
+
+    this.selectionService.chartSelectionSubject.subscribe((rowKey: string) => {
+      const [wellId, targetName] = rowKey.split('_');
+      this.highlightWellInPlate(wellId); // Method to handle selection
+    });
   }
 
   get cellSize(): number {
@@ -292,6 +297,10 @@ export class MultiWellPlateComponent implements OnInit {
     });
   }
 
+  /**
+   * we sent to rowKey which was emitted in the chart component
+   * to the WellSelectionService.
+   */
   onWellSelected(rowKey: string): void {
     if (rowKey === 'clearSelection') {
       this.selectionService.clearSelection();
@@ -299,7 +308,21 @@ export class MultiWellPlateComponent implements OnInit {
       this.selectionService.selectTableRowByKey(rowKey);
 
       const [wellId, targetName] = rowKey.split('_');
-      //this.selectionService.selectWellById(wellId);
+      console.log(wellId);
+      this.selectionService.chartSelectionSubject.next(wellId);
+
+    }
+  }
+
+  highlightWellInPlate(wellId: string): void {
+    const well = this.plateService.getFlatWells().find(w => w.id == wellId);
+
+    if (well) {
+      this.selectionService.clearSelection(); // Clear existing selections
+      this.selectionService.selection.select(well); // Select the corresponding well
+      this.updateCurrentWellPosition(); // Update well position display
+    } else {
+      console.error(`Well ID ${wellId} not found.`);
     }
   }
 

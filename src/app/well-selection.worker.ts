@@ -71,7 +71,8 @@ addEventListener('message', ({data}) => {
       postSelectionUpdate();
       break;
     case 'updateFromTable':
-      console.log("Nothing");
+      updatePlateFromTable(message.payload);
+      postSelectionUpdateFromTable();
       break;
     case 'selectWellById':
       selectWellById(message.payload.wellId);
@@ -177,6 +178,13 @@ function clearSelection(): void {
   lastSelectedWell = null;
 }
 
+function updatePlateFromTable(payload: string[]): void {
+  clearSelection();
+  payload.forEach(wellId => {
+    selectedWellIds.add(wellId);
+  });
+}
+
 function selectWellById(wellId: string): void {
   console.log(`Web Worker: Selecting wellId ${wellId}`);
   const well = wells.flat().find(w => w.id === wellId);
@@ -194,4 +202,8 @@ function selectWellById(wellId: string): void {
  */
 function postSelectionUpdate(): void {
   postMessage({type: 'selectionUpdate', payload: Array.from(selectedWellIds)});
+}
+
+function postSelectionUpdateFromTable(): void {
+  postMessage({type: 'selectionUpdateFromTable', payload: Array.from(selectedWellIds)});
 }
