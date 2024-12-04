@@ -161,7 +161,6 @@ export class WellSelectionService {
   selectTableRowByKey(rowKey: string): void {
     this.tableRowSelectionSubject.next(rowKey);
     this.worker.postMessage({type: "selectRowByRowKey", payload: rowKey});
-    //this.chartSelectionSubject.next(rowKey);
   }
 
   private updateSelectionFromTable(selectedWellsIds: string[]): void {
