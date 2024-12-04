@@ -306,11 +306,9 @@ export class MultiWellPlateComponent implements OnInit {
       this.selectionService.clearSelection();
     } else {
       this.selectionService.selectTableRowByKey(rowKey);
-
-      const [wellId, targetName] = rowKey.split('_');
-      console.log(wellId);
-      this.selectionService.chartSelectionSubject.next(wellId);
-
+      /* const [wellId, targetName] = rowKey.split('_');
+       console.log(wellId);
+       this.selectionService.chartSelectionSubject.next(wellId);*/
     }
   }
 

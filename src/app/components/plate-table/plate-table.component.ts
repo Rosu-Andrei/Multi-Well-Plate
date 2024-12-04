@@ -60,17 +60,10 @@ export class PlateTableComponent implements OnInit {
       }
     );
     this.selectionService.tableRowSelectionSubject.subscribe((rowKey: string) => {
-      this.selectRowByKey(rowKey);
+      this.updateTableFromChart(rowKey);
     });
   }
 
-  selectRowByKey(rowKey: string): void {
-    this.isSelectionUpdatingFromPlate = true;
-    this.dataGrid.instance.clearSelection();
-    this.dataGrid.instance.selectRows([rowKey], true).then(() => {
-      this.isSelectionUpdatingFromPlate = false;
-    });
-  }
 
   /**
    * this method is used to populate the wellsForTable[] that is going to be used as a datasource for the grid.
@@ -211,6 +204,18 @@ export class PlateTableComponent implements OnInit {
       const wellId = event.oldData.id;
       this.store.dispatch(updateWellSample({wellId, changes: changes}));
     }
+  }
+
+  updateTableFromChart(rowKey: string) {
+    this.isSelectionUpdatingFromPlate = true;
+
+    this.dataGrid.instance.clearSelection();
+
+    // Find the row corresponding to the rowKey and select it
+    this.dataGrid.instance.selectRows([rowKey], true).then(() => {
+      // Reset the selection update flag
+      this.isSelectionUpdatingFromPlate = false;
+    });
   }
 
 }

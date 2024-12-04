@@ -24,7 +24,7 @@ export class PlotlyChartComponent implements OnChanges {
    * will send back to the chart component. It represents the data of the chart.
    */
   @Input() chartData: any[] = [];
-  @Output() selectedWell = new EventEmitter<string>();
+  @Output() selectedTraceEmitter = new EventEmitter<string>();
 
   constructor() {
   }
@@ -58,7 +58,7 @@ export class PlotlyChartComponent implements OnChanges {
 
     const rowKey = `${wellId}_${targetName}`;
 
-    this.selectedWell.emit(rowKey);
+    this.selectedTraceEmitter.emit(rowKey);
 
 
     /**
@@ -88,7 +88,7 @@ export class PlotlyChartComponent implements OnChanges {
       if (this.selectedTraceIndex === null) {
         trace.line.opacity = 1;
         trace.line.width = 2;
-        this.selectedWell.emit("clearSelection");
+        this.selectedTraceEmitter.emit("clearSelection");
       }
       /**
        * else, it means that the user has selected a specific trace, and we modify the one

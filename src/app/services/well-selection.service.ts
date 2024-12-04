@@ -47,6 +47,8 @@ export class WellSelectionService {
           this.updateSelectionModel(message.payload);
         } else if (message.type === 'selectionUpdateFromTable') {
           this.updateSelectionFromTable(message.payload);
+        } else if (message.type === 'rowKeyUpdate') {
+          this.updateTableFromRowKey(message.payload);
         }
       };
       /**
@@ -142,7 +144,7 @@ export class WellSelectionService {
     this.worker.postMessage({type: "updateFromTable", payload: selectedWellIds})
   }
 
-  selectWellById(wellId: string): void {
+  /*selectWellById(wellId: string): void {
     if (wellId !== 'clearSelection') {
       this.worker.postMessage({
         type: 'selectWellById',
@@ -154,14 +156,15 @@ export class WellSelectionService {
         payload: {wellId},
       });
     }
-  }
+  }*/
 
   selectTableRowByKey(rowKey: string): void {
     this.tableRowSelectionSubject.next(rowKey);
-    this.chartSelectionSubject.next(rowKey);
+    this.worker.postMessage({type: "selectRowByRowKey", payload: rowKey});
+    //this.chartSelectionSubject.next(rowKey);
   }
 
-  updateSelectionFromTable(selectedWellsIds: string[]): void {
+  private updateSelectionFromTable(selectedWellsIds: string[]): void {
     const selectedWells = this.plateService.getWells().flat().filter((well) => {
         return selectedWellsIds.includes(well.id);
       }
@@ -178,5 +181,19 @@ export class WellSelectionService {
      * si astfel am rezolvat probleme intre selectia unui singur rand si selectarea
      * acelui well in plate.
      */
+  }
+
+  private updateTableFromRowKey(selectedRowKeys: string[]) {
+    selectedRowKeys.forEach(rowKey => {
+      this.tableRowSelectionSubject.next(rowKey);
+    });
+    selectedRowKeys.forEach(rowKey => {
+      let [wellId, targetName] = rowKey.split('_');
+      this.selection.clear();
+      const selectedWell = this.plateService.getFlatWells().filter(well => {
+        return well.id == wellId;
+      });
+      this.selection.select(...selectedWell);
+    });
   }
 }

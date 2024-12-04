@@ -23,6 +23,10 @@ let wells: Well[][] = [];
  */
 let selectedWellIds: Set<string> = new Set();
 let lastSelectedWell: Well | null = null;
+/**
+ * this one is going to hold the rowKeys used by the chart and table component
+ */
+let selectedRowKeys: Set<string> = new Set();
 
 /**
  * This is the method that listens for messages coming from the main thread.
@@ -77,6 +81,10 @@ addEventListener('message', ({data}) => {
     case 'selectWellById':
       selectWellById(message.payload.wellId);
       postSelectionUpdate();
+      break;
+    case 'selectRowByRowKey':
+      selectRowByRowKey(message.payload);
+      postRowKeyUpdate();
       break;
     default:
       console.error('Unknown message type:', message.type);
@@ -196,6 +204,15 @@ function selectWellById(wellId: string): void {
   }
 }
 
+function selectRowByRowKey(rowKey: string) {
+  const [wellId, targetName] = rowKey.split('_');
+  console.log(`The wellId from the trace is ${wellId}`);
+  console.log(`The targetName from the trace is ${targetName}`);
+  if (rowKey) {
+    selectedRowKeys.add(rowKey);
+  }
+}
+
 /**
  * this method is called for every case in the switch. It sends back to the main thread the Set that contains
  * all the wells id for selection.
@@ -206,4 +223,8 @@ function postSelectionUpdate(): void {
 
 function postSelectionUpdateFromTable(): void {
   postMessage({type: 'selectionUpdateFromTable', payload: Array.from(selectedWellIds)});
+}
+
+function postRowKeyUpdate(): void {
+  postMessage({type: 'rowKeyUpdate', payload: Array.from(selectedRowKeys)});
 }
