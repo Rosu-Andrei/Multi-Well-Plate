@@ -133,19 +133,18 @@ export class PlateTableComponent implements OnInit {
    * this method is used to get the current rows selected at a given time.
    */
   onSelectionChanged(event: any): void {
-    /**
-     * check to prevent infinite loops
-     */
     if (this.isSelectionUpdatingFromPlate) {
       return;
     }
 
-    this.selectedWells = event.selectedRowKeys
-      .map((key: string) => this.wellsForTable.find((well) => well.rowKey === key))
-      .filter(Boolean) as WellTableRow[];
+    this.selectedWells = event.selectedRowsData as WellTableRow[];
 
     const selectedWellIds = this.selectedWells.map((well) => well.id);
     this.updatePlateSelection(selectedWellIds);
+
+    // Emit the selected row keys to the WellSelectionService
+    const selectedRowKeys = this.selectedWells.map((well) => well.rowKey);
+    this.selectionService.tableSelectionSubject.next(selectedRowKeys);
   }
 
   /**

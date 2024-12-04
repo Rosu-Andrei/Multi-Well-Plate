@@ -181,6 +181,8 @@ export class MultiWellPlateComponent implements OnInit {
       this.currentWell = null;
       this.selectedWellsPositions = '';
     }
+
+    this.selectionService.plateSelectionSubject.next(currentSelection.selected);
   }
 
   /**

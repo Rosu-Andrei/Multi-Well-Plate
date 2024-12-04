@@ -1,11 +1,13 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {WellSelectionService} from "../../services/well-selection.service";
+import {Well} from "../../model/well";
 
 @Component({
   selector: 'app-plotly-chart',
   templateUrl: './plotly-chart.component.html',
   styleUrls: ['./plotly-chart.component.css']
 })
-export class PlotlyChartComponent implements OnChanges {
+export class PlotlyChartComponent implements OnChanges, OnInit {
 
   public graph: any = {
     data: [],
@@ -26,7 +28,7 @@ export class PlotlyChartComponent implements OnChanges {
   @Input() chartData: any[] = [];
   @Output() selectedTraceEmitter = new EventEmitter<string>();
 
-  constructor() {
+  constructor(private selectionService: WellSelectionService) {
   }
 
   /**
@@ -38,6 +40,19 @@ export class PlotlyChartComponent implements OnChanges {
     if (changes["chartData"]) {
       this.graph.data = this.chartData || [];
     }
+  }
+
+  ngOnInit(): void {
+    // Subscribe to plate selection changes
+    this.selectionService.plateSelectionSubject.subscribe((selectedWells: Well[]) => {
+      const selectedWellIds = selectedWells.map((well) => well.id);
+      this.highlightTracesByWellIds(selectedWellIds);
+    });
+
+    // Subscribe to table selection changes
+    this.selectionService.tableSelectionSubject.subscribe((selectedRowKeys: string[]) => {
+      this.highlightTracesByRowKeys(selectedRowKeys);
+    });
   }
 
   /**
@@ -108,5 +123,60 @@ export class PlotlyChartComponent implements OnChanges {
      */
     this.graph = {...this.graph};
   }
-}
 
+  private highlightTracesByWellIds(selectedWellIds: string[]): void {
+    if (selectedWellIds.length === 0) {
+      this.resetTraceStyles();
+      return;
+    }
+
+    this.graph.data.forEach((trace: any) => {
+      const [wellId] = trace.name.split('_');
+      if (selectedWellIds.includes(wellId)) {
+        // Highlight trace
+        trace.line.opacity = 1;
+        trace.line.width = 4;
+      } else {
+        // Dim trace
+        trace.line.opacity = 0.3;
+        trace.line.width = 0.5;
+      }
+    });
+    this.updateGraph();
+  }
+
+  private highlightTracesByRowKeys(selectedRowKeys: string[]): void {
+    if (selectedRowKeys.length === 0) {
+      this.resetTraceStyles();
+      return;
+    }
+
+    this.graph.data.forEach((trace: any) => {
+      if (selectedRowKeys.includes(trace.name)) {
+        // Highlight trace
+        trace.line.opacity = 1;
+        trace.line.width = 4;
+      } else {
+        // Dim trace
+        trace.line.opacity = 0.3;
+        trace.line.width = 0.5;
+      }
+    });
+    this.updateGraph();
+  }
+
+  private resetTraceStyles(): void {
+    this.graph.data.forEach((trace: any) => {
+      trace.line.opacity = 1;
+      trace.line.width = 2;
+    });
+    this.updateGraph();
+  }
+
+  /**
+   * Triggers the chart to update.
+   */
+  private updateGraph(): void {
+    this.graph = {...this.graph};
+  }
+}

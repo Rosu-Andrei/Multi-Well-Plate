@@ -223,6 +223,9 @@ function postSelectionUpdate(): void {
   postMessage({type: 'selectionUpdate', payload: Array.from(selectedWellIds)});
 }
 
+/**
+ * we send to the main thread the
+ */
 function postSelectionUpdateFromTable(): void {
   postMessage({type: 'selectionUpdateFromTable', payload: Array.from(selectedWellIds)});
 }
