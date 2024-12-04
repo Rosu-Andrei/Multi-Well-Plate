@@ -172,5 +172,11 @@ export class WellSelectionService {
      */
     this.selection.clear();
     this.selection.select(...selectedWells);
+
+    /**
+     * aici sigura diferenta este ca nu emit noul mesaj folosind selectionChangeSubject,
+     * si astfel am rezolvat probleme intre selectia unui singur rand si selectarea
+     * acelui well in plate.
+     */
   }
 }
