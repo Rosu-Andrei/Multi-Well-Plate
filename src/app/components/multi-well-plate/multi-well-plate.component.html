@@ -181,7 +181,7 @@
       </div>
     </div>
   </div>
-  <div class="chart-wraper" *ngIf="isChartVisible">
-    <app-plotly-chart [chartData]="chartData" (selectedTraceEmitter)="onWellSelected($event)"></app-plotly-chart>
-  </div>
+</div>
+<div class="chart-wrapper" *ngIf="isChartVisible">
+  <app-plotly-chart [chartData]="chartData" (selectedTraceEmitter)="onWellSelected($event)"></app-plotly-chart>
 </div>

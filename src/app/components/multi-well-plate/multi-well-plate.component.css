@@ -56,14 +56,12 @@
   width: 100%;
 }
 
-
 .plate-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
 }
-
 
 .column-headers {
   display: flex;
@@ -89,7 +87,6 @@
 .plate-and-rows-wrapper {
   display: flex;
 }
-
 
 .row-headers {
   display: flex;
@@ -323,7 +320,8 @@
   overflow-x: auto;
 }
 
-.chart-wraper {
+/* Chart Wrapper Styling */
+.chart-wrapper {
   margin-top: 20px; /* Adds space above the chart */
   padding: 10px;
   border: 1px solid #ccc;
