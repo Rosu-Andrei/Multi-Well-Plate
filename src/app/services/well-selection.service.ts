@@ -177,9 +177,8 @@ export class WellSelectionService {
 
   selectTableRowByKey(rowKey: string): void {
     this.tableRowSelectionSubject.next(rowKey);
-    this.worker.postMessage({type: "selectRowByRowKey", payload: rowKey});
     this.tableSelectionSubject.next([rowKey]);
-
+    this.worker.postMessage({type: "selectRowByRowKey", payload: rowKey});
   }
 
   private updateSelectionFromTable(selectedWellsIds: string[]): void {
@@ -195,9 +194,8 @@ export class WellSelectionService {
     this.selection.select(...selectedWells);
 
     /**
-     * aici sigura diferenta este ca nu emit noul mesaj folosind selectionChangeSubject,
-     * si astfel am rezolvat probleme intre selectia unui singur rand si selectarea
-     * acelui well in plate.
+     * this method is very similar to the updateSelectionModel. The main difference is that we don't emit
+     * any data using any subject.
      */
   }
 
