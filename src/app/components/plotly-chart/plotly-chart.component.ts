@@ -43,13 +43,17 @@ export class PlotlyChartComponent implements OnChanges, OnInit {
   }
 
   ngOnInit(): void {
-    // Subscribe to plate selection changes
+    /**
+     * subscribe to the selection changes made in the plate
+     */
     this.selectionService.plateSelectionSubject.subscribe((selectedWells: Well[]) => {
       const selectedWellIds = selectedWells.map((well) => well.id);
       this.highlightTracesByWellIds(selectedWellIds);
     });
 
-    // Subscribe to table selection changes
+    /**
+     * subscribe to the selection changes made in the table
+     */
     this.selectionService.tableSelectionSubject.subscribe((selectedRowKeys: string[]) => {
       this.highlightTracesByRowKeys(selectedRowKeys);
     });

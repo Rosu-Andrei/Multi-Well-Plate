@@ -50,7 +50,7 @@ export class WellSelectionService {
         /**
          * if the message type is equal to "selectionUpdate", this means
          * that a selection update has happened.
-         * The payload that is coming back from the web worker is the Set with the well ids that
+         * The payload that is coming back from the web worker is an Array with the well ids that
          * are up for selection
          */
         if (message.type === 'selectionUpdate') {
@@ -126,7 +126,7 @@ export class WellSelectionService {
   private updateSelectionModel(selectedWellIds: string[]): void {
     /**
      * we create a well array that will contain only the wells that have been marked by the web
-     * worker for selection. The identification is done using the Set<> from the web worker that contains the well ids.
+     * worker for selection. The identification is done using the Array from the web worker that contains the well ids.
      */
     const selectedWells = this.plateService.getWells().flat().filter((well) => {
       return selectedWellIds.includes(well.id);
@@ -156,8 +156,8 @@ export class WellSelectionService {
      * then we emit changes to the chart and the table, so that they will update accordingly.
      */
     if (hasSelectionChanged) {
-      this.plateSelectionSubject.next(selectedWells);
-      this.selectionChangeSubject.next(selectedWells);
+      this.plateSelectionSubject.next(selectedWells); // emit changes to the chart
+      this.selectionChangeSubject.next(selectedWells); // emit changes to the table
     }
   }
 
