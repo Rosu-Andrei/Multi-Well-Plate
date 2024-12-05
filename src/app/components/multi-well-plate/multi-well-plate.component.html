@@ -93,7 +93,7 @@
                   class="cell well-cell"
                   *ngFor="let well of row"
                   (click)="toggleWellSelection($event, well)"
-                  [class.selected]="selectionService.selection.isSelected(well)"
+                  [class.selected]="isSelected(well)"
                 >
                   <fa-icon [icon]="faFlask" class="well-icon" *ngIf="samples[well.id]?.sampleRole"></fa-icon>
                   <span class="well-letter" *ngIf="samples[well.id]?.sampleRole">
@@ -140,13 +140,14 @@
           type="text"
           [value]="
             currentWell
-              ? currentWell.id
-              : selectionService.selection.selected.length > 0
-              ? selectedWellsPositions
-              : 'None'
-          "
+            ? currentWell.id
+            : selectedWellIds.length > 0
+            ? selectedWellsPositions
+            : 'None'
+  "
           readonly
         />
+
 
         <label>Sample ID:</label>
         <input

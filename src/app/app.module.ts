@@ -12,10 +12,10 @@ import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {DxDataGridModule} from "devextreme-angular";
 import {PlateTableComponent} from './components/plate-table/plate-table.component';
 import {StoreModule} from "@ngrx/store";
-import {wellSamplesReducer} from "./store/well.reducer";
+import {wellSamplesReducer, wellSelectionReducer} from "./store/well.reducer";
 import * as PlotlyJS from 'plotly.js-dist-min';
 import {PlotlyModule} from 'angular-plotly.js';
-import { PlotlyChartComponent } from './components/plotly-chart/plotly-chart.component';
+import {PlotlyChartComponent} from './components/plotly-chart/plotly-chart.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -34,7 +34,10 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatButtonToggle,
     FontAwesomeModule,
     DxDataGridModule,
-    StoreModule.forRoot({wellSamples: wellSamplesReducer}),
+    StoreModule.forRoot({
+      wellSamples: wellSamplesReducer,
+      wellSelection: wellSelectionReducer
+    }),
     PlotlyModule
   ],
   providers: [

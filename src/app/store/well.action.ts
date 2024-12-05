@@ -12,3 +12,17 @@ export const updateWellSample = createAction(
   '[Well] Update Well Sample',
   props<{ wellId: string; changes: Partial<WellSample> }>()
 );
+
+export const updateSelectedWellIds = createAction(
+  '[Well Selection] Update Selected Well Ids',
+  props<{ selectedWellIds: string[] }>()
+);
+
+export const updateSelectedRowKeys = createAction(
+  '[Well Selection] Update Selected Row Keys',
+  props<{ selectedRowKeys: string[] }>()
+);
+
+export const clearSelection = createAction(
+  '[Well Selection] Clear Selection'
+);

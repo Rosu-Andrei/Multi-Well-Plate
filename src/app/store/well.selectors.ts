@@ -1,5 +1,5 @@
 import {createSelector, createFeatureSelector} from '@ngrx/store';
-import {WellSamplesState} from "./well.state";
+import {WellSamplesState, WellSelectionState} from "./well.state";
 
 /**
  * The role of the selectors are to access a specific piece of data from the well state store
@@ -24,4 +24,16 @@ export const selectSampleByWellId = (wellId: string) =>
 export const selectAllSamples = createSelector(
   selectWellSamplesState,
   (state) => state.samples
+);
+
+export const selectWellSelectionState = createFeatureSelector<WellSelectionState>('wellSelection');
+
+export const selectSelectedWellIds = createSelector(
+  selectWellSelectionState,
+  (state) => state.selectedWellIds
+);
+
+export const selectSelectedRowKeys = createSelector(
+  selectWellSelectionState,
+  (state) => state.selectedRowKeys
 );

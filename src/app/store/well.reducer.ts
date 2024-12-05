@@ -1,6 +1,6 @@
 import {createReducer, on} from '@ngrx/store';
-import {updateWellSample} from './well.action';
-import {initialState} from "./well.state";
+import {clearSelection, updateSelectedRowKeys, updateSelectedWellIds, updateWellSample} from './well.action';
+import {initialSelectionState, initialState} from "./well.state";
 
 /**
  * the reducer listens for the actions defined, in this case the only actions defined and
@@ -33,4 +33,21 @@ export const wellSamplesReducer = createReducer(
       },
     };
   })
+);
+
+export const wellSelectionReducer = createReducer(
+  initialSelectionState,
+  on(updateSelectedWellIds, (state, {selectedWellIds}) => ({
+    ...state,
+    selectedWellIds,
+  })),
+  on(updateSelectedRowKeys, (state, {selectedRowKeys}) => ({
+    ...state,
+    selectedRowKeys,
+  })),
+  on(clearSelection, (state) => ({
+    ...state,
+    selectedWellIds: [],
+    selectedRowKeys: [],
+  }))
 );

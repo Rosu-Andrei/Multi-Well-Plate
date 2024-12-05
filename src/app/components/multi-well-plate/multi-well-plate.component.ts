@@ -1,76 +1,90 @@
-import {Component, OnInit} from '@angular/core';
-import {faBars, faFlask, faSearchMinus, faSearchPlus,} from '@fortawesome/free-solid-svg-icons';
+// multi-well-plate.component.ts
+
+import {Component, OnInit, OnDestroy} from '@angular/core';
+import {
+  faBars,
+  faFlask,
+  faSearchMinus,
+  faSearchPlus,
+} from '@fortawesome/free-solid-svg-icons';
 import {mockWells, Well} from '../../model/well';
 import {PlateService} from '../../services/plate.service';
 import {WellSelectionService} from '../../services/well-selection.service';
-import {Store} from "@ngrx/store";
-import {WellSample, WellSamplesState} from "../../store/well.state";
-import {selectAllSamples} from "../../store/well.selectors";
-import {updateWellSample} from "../../store/well.action";
-import {ChartDataItem} from "../../model/chart";
+import {Store} from '@ngrx/store';
+import {WellSample, AppState} from '../../store/well.state';
+import {updateWellSample, updateSelectedRowKeys, clearSelection} from '../../store/well.action';
+import {ChartDataItem} from '../../model/chart';
+import {Subscription} from 'rxjs';
+import {selectAllSamples, selectSelectedRowKeys, selectSelectedWellIds} from "../../store/well.selectors";
 
 @Component({
   selector: 'app-multi-well-plate',
   templateUrl: './multi-well-plate.component.html',
   styleUrls: ['./multi-well-plate.component.css'],
 })
-
-export class MultiWellPlateComponent implements OnInit {
+export class MultiWellPlateComponent implements OnInit, OnDestroy {
   faFlask = faFlask;
   faSearchPlus = faSearchPlus;
   faSearchMinus = faSearchMinus;
   faBars = faBars;
 
-  zoomLevel: number = 1; // Initial zoom level
-  menuVisible: boolean = false; // Whether the side menu is visible or not
-  activeTab: string = 'well-settings'; // Default active tab
-  sampleId: string = ''; // Default sample ID
-  sampleRole: string = 'Unknown Sample'; // Default sample role
-  targetNames: string = ''; // This variable stores all the targetNames of a well separated by comma.
-  currentWell: Well | null = null; // Currently selected single well
-  selectedWellsPositions: string = ''; // IDs of selected wells
+  zoomLevel: number = 1;
+  menuVisible: boolean = false;
+  activeTab: string = 'well-settings';
+  sampleId: string = '';
+  sampleRole: string = 'Unknown Sample';
+  targetNames: string = '';
+  currentWell: Well | null = null;
+  selectedWellsPositions: string = '';
 
-  baseCellSize: number = 30; // Base size for cells in pixels
+  baseCellSize: number = 30;
   samples: Record<string, WellSample> = {};
 
   isChartVisible: boolean = false;
-  chartData: any[] = []; // Holds the data to be passed to PlotlyChartComponent
-  mockChartData: ChartDataItem[] = []; // Now generated dynamically
+  chartData: any[] = [];
+  mockChartData: ChartDataItem[] = [];
 
-  toggleChart(): void {
-    this.isChartVisible = !this.isChartVisible;
-  }
+  selectedWellIds: string[] = [];
+  selectedRowKeys: string[] = [];
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     public plateService: PlateService,
     public selectionService: WellSelectionService,
-    private store: Store<WellSamplesState>
+    private store: Store<AppState>
   ) {
   }
 
-  ngOnInit(): void {
-    /**
-     * we subscribe to the Subject so that we receive the data that it emits.
-     */
-    this.selectionService.selectionChangeSubject.subscribe(
-      (selectedWells: Well[]) => {
-        this.updateCurrentWellPosition();
-        this.updateSampleInfo();
-      }
-    );
-    /**
-     * when the page it is initiated, we get all the initial well states form the store. Also, we subscribe to the store so that
-     * any change made (the user has added a sampleId for example) will be intercepted. With this, a sync is maintained between
-     * the plate and the well settings tab.
-     */
-    this.store.select(selectAllSamples).subscribe((samples) => {
-      this.samples = samples;
-    });
 
-    this.selectionService.chartSelectionSubject.subscribe((rowKey: string) => {
-      const [wellId, targetName] = rowKey.split('_');
-      this.highlightWellInPlate(wellId); // Method to handle selection
-    });
+  ngOnInit(): void {
+    // Subscribe to selectedRowKeys to update selectedWellIds
+    this.subscriptions.add(
+      this.store.select(selectSelectedRowKeys).subscribe((selectedRowKeys) => {
+        this.selectedRowKeys = selectedRowKeys;
+        const selectedWellIdsFromRowKeys = Array.from(
+          new Set(selectedRowKeys.map((key) => key.split('_')[0]))
+        );
+
+        // Update selectedWellIds only if they have changed
+        if (this.selectedWellIds.sort().join(',') !== selectedWellIdsFromRowKeys.sort().join(',')) {
+          this.selectedWellIds = selectedWellIdsFromRowKeys;
+          this.updateCurrentWellPosition();
+          this.updateSampleInfo();
+        }
+      })
+    );
+
+    // Subscribe to samples
+    this.subscriptions.add(
+      this.store.select(selectAllSamples).subscribe((samples) => {
+        this.samples = samples;
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    // Unsubscribe to prevent memory leaks
+    this.subscriptions.unsubscribe();
   }
 
   get cellSize(): number {
@@ -87,38 +101,29 @@ export class MultiWellPlateComponent implements OnInit {
     this.selectionService.initializeWorker();
   }
 
-  /**
-   * this functions extracts well data from an array with the values already predefined. Each well inside the array
-   * has its data synchronised with the well plate, well settings and table view. Also, it sends back an array of
-   * ChartDataItem to the chart-component for the rendering of the plot.
-   */
   load(): void {
     this.selectionService.clearSelection();
 
     mockWells.forEach((mockWell) => {
-
-      /**
-       * for each well from the mockArray, we extract the data a well contains.
-       */
       const wellId = mockWell.id;
       const sampleId = mockWell.sampleId;
       const sampleRole = mockWell.sampleRole;
-      const targetNames = mockWell.targetName ? mockWell.targetName.split(',').map(name => name.trim()).slice(0, 7) : [];
+      const targetNames = mockWell.targetName
+        ? mockWell.targetName.split(',').map((name) => name.trim()).slice(0, 7)
+        : [];
 
-      const well = this.plateService.getFlatWells().find(w => w.id === wellId);
-      /**
-       * if the well is undefined, it means that the wellID we used for the finding doesn't exist on the current plate.
-       */
+      const well = this.plateService.getFlatWells().find((w) => w.id === wellId);
       if (well) {
-        this.store.dispatch(updateWellSample({
-          wellId: well.id,
-          changes: {
-            sampleId: sampleId,
-            sampleRole: sampleRole,
-            targetNames: targetNames
-          }
-        }));
-
+        this.store.dispatch(
+          updateWellSample({
+            wellId: well.id,
+            changes: {
+              sampleId: sampleId,
+              sampleRole: sampleRole,
+              targetNames: targetNames,
+            },
+          })
+        );
       } else {
         console.error(`Well ID ${wellId} not found on the current plate.`);
       }
@@ -130,7 +135,17 @@ export class MultiWellPlateComponent implements OnInit {
 
   toggleWellSelection(event: MouseEvent, well: Well): void {
     this.selectionService.toggleWellSelection(event, well);
+
+    // After updating selectedWellIds, get all rowKeys for the wellId
+    const wellId = well.id;
+    const sampleData = this.samples[wellId] || {};
+    const targetNames = sampleData.targetNames || ['NoTarget'];
+    const selectedRowKeys = targetNames.map((targetName) => `${wellId}_${targetName}`);
+
+    // Dispatch updateSelectedRowKeys
+    this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
   }
+
 
   toggleRowSelection(event: MouseEvent, rowIndex: number): void {
     this.selectionService.toggleRowSelection(event, rowIndex);
@@ -162,39 +177,35 @@ export class MultiWellPlateComponent implements OnInit {
     this.activeTab = tab;
   }
 
-  /**
-   * this method determines if only a single well has been selected. If it is so,
-   * then the current well will point to this well. If multiple wells are selected or none, then
-   * the current well will receive the null value.
-   *
-   * This method is essential in showing the current selected well position in the readOnly box
-   */
+  isSelected(well: Well): boolean {
+    return this.selectedWellIds.includes(well.id);
+  }
+
+
   updateCurrentWellPosition(): void {
-    const currentSelection = this.selectionService.selection;
-    if (currentSelection.selected.length === 1) {
-      this.currentWell = currentSelection.selected[0];
+    const selectedWells = this.plateService
+      .getFlatWells()
+      .filter((well) => this.selectedWellIds.includes(well.id));
+
+    if (selectedWells.length === 1) {
+      this.currentWell = selectedWells[0];
       this.selectedWellsPositions = this.currentWell.id;
-    } else if (currentSelection.selected.length > 1) {
+    } else if (selectedWells.length > 1) {
       this.currentWell = null;
-      this.selectedWellsPositions = currentSelection.selected.map((well) => well.id).join(' ');
+      this.selectedWellsPositions = selectedWells.map((well) => well.id).join(' ');
     } else {
       this.currentWell = null;
       this.selectedWellsPositions = '';
     }
-
-    this.selectionService.plateSelectionSubject.next(currentSelection.selected);
   }
 
-  /**
-   * This method is very similar in what it does with the one above. The difference is that,
-   * it displays the sampleID and sampleRole that a selected well has.
-   *
-   * If multiple wells are selected, the window will display "" as the id and Unknown Value as the sample role.
-   */
   updateSampleInfo(): void {
-    const array = this.selectionService.selection.selected;
+    const selectedWells = this.plateService
+      .getFlatWells()
+      .filter((well) => this.selectedWellIds.includes(well.id));
+
     if (this.currentWell) {
-      const sampleData = this.samples[this.currentWell.id] || {}; // get the current data of the well using the store
+      const sampleData = this.samples[this.currentWell.id] || {};
       this.sampleId = sampleData.sampleId || '';
       this.sampleRole = sampleData.sampleRole || 'Unknown Sample';
       this.targetNames = (sampleData.targetNames || []).join(', ');
@@ -202,7 +213,7 @@ export class MultiWellPlateComponent implements OnInit {
       this.sampleId = '';
       this.sampleRole = 'Unknown Sample';
       this.targetNames = '';
-      array.forEach((well) => {
+      selectedWells.forEach((well) => {
         const sampleData = this.samples[well.id] || {};
         if (sampleData.sampleId) {
           this.sampleId += sampleData.sampleId + ' ';
@@ -214,56 +225,40 @@ export class MultiWellPlateComponent implements OnInit {
     }
   }
 
-  /**
-   * When the user enters a sampleId, this method will:
-   * 1. update the component sampleId (because we want to show it updated in the browser)
-   * 2. We dispatch a new action to the state storage to update for each selected well with the newly added data.
-   */
   onSampleIdChange(newSampleId: string): void {
     this.sampleId = newSampleId;
-    this.selectionService.selection.selected.forEach((well) => {
-      this.store.dispatch(updateWellSample({wellId: well.id, changes: {sampleId: newSampleId}}))
+    this.selectedWellIds.forEach((wellId) => {
+      this.store.dispatch(updateWellSample({wellId, changes: {sampleId: newSampleId}}));
     });
   }
 
-  /**
-   * This method is very similar with the one above, the only difference being that
-   * it is updating the Sample Role property.
-   */
   onSampleRoleChange(newSampleRole: string): void {
     this.sampleRole = newSampleRole;
-    this.selectionService.selection.selected.forEach((well) => {
-      this.store.dispatch(updateWellSample({wellId: well.id, changes: {sampleRole: newSampleRole}}))
+    this.selectedWellIds.forEach((wellId) => {
+      this.store.dispatch(updateWellSample({wellId, changes: {sampleRole: newSampleRole}}));
     });
   }
 
-  /**
-   * When the user parses one or multiple targetNames with comma in the well-settings tab,
-   * this method will take those new values and will put them all in an array.
-   * The array then is sent to the state store for update.
-   */
-  onTargetNameChange(newTargetNames: string) {
+  onTargetNameChange(newTargetNames: string): void {
     this.targetNames = newTargetNames;
-    const targetNamesArray = newTargetNames.split(',').map(name => name.trim()).slice(0, 7);
-    this.selectionService.selection.selected.forEach((well) => {
-      this.store.dispatch(updateWellSample({wellId: well.id, changes: {targetNames: targetNamesArray}}))
+    const targetNamesArray = newTargetNames.split(',').map((name) => name.trim()).slice(0, 7);
+    this.selectedWellIds.forEach((wellId) => {
+      this.store.dispatch(updateWellSample({wellId, changes: {targetNames: targetNamesArray}}));
     });
   }
 
-  /**
-   * this method is responsible for creating the mockData for the chart based on the mockData for the plate.
-   * It randomly generates the y value, whereas the x vale is a sequence from 1 to 46.
-   */
   generateMockChartData(): void {
     this.mockChartData = [];
 
     mockWells.forEach((well) => {
       const wellId = well.id;
-      const targetNames = well.targetName ? well.targetName.split(',').map(name => name.trim()) : [];
+      const targetNames = well.targetName
+        ? well.targetName.split(',').map((name) => name.trim())
+        : [];
 
       targetNames.forEach((targetName) => {
         const x = Array.from({length: 45}, (_, i) => i + 1);
-        const y = x.map(() => (Math.random() / 10)); // Generate random y values for demonstration
+        const y = x.map(() => Math.random() / 10);
 
         this.mockChartData.push({
           wellId: wellId,
@@ -275,56 +270,34 @@ export class MultiWellPlateComponent implements OnInit {
     });
   }
 
-  /**
-   * Based on the mockData for the chart, it will create the charData array that will then be sent to the
-   * chart-component which will use it to render the plot.
-   */
   prepareChartData(): void {
     this.chartData = [];
     this.mockChartData.forEach((dataItem) => {
       const trace = {
-          x: dataItem.x,
-          y: dataItem.y,
-          type: 'scattergl',
-          mode: 'lines',
-          name: `${dataItem.wellId}_${dataItem.targetName}`,
-          hovertemplate: `<i>Well ID: ${dataItem.wellId}, Target Name: ${dataItem.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`,
-          line: {
-            width: 2,
-            opacity: 1,
-          }
-        }
-      ;
+        x: dataItem.x,
+        y: dataItem.y,
+        type: 'scattergl',
+        mode: 'lines',
+        name: `${dataItem.wellId}_${dataItem.targetName}`,
+        hovertemplate: `<i>Well ID: ${dataItem.wellId}, Target Name: ${dataItem.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`,
+        line: {
+          width: 2,
+          opacity: 1,
+        },
+      };
       this.chartData.push(trace);
     });
   }
 
-  /**
-   * we sent to rowKey which was emitted in the chart component
-   * to the WellSelectionService.
-   */
   onWellSelected(rowKey: string): void {
     if (rowKey === 'clearSelection') {
-      this.selectionService.clearSelection();
+      this.store.dispatch(clearSelection());
     } else {
-      this.selectionService.selectTableRowByKey(rowKey);
-      /* const [wellId, targetName] = rowKey.split('_');
-       console.log(wellId);
-       this.selectionService.chartSelectionSubject.next(wellId);*/
+      this.store.dispatch(updateSelectedRowKeys({selectedRowKeys: [rowKey]}));
     }
   }
 
-  highlightWellInPlate(wellId: string): void {
-    const well = this.plateService.getFlatWells().find(w => w.id == wellId);
-
-    if (well) {
-      this.selectionService.clearSelection(); // Clear existing selections
-      this.selectionService.selection.select(well); // Select the corresponding well
-      this.updateCurrentWellPosition(); // Update well position display
-    } else {
-      console.error(`Well ID ${wellId} not found.`);
-    }
+  toggleChart(): void {
+    this.isChartVisible = !this.isChartVisible;
   }
-
-
 }

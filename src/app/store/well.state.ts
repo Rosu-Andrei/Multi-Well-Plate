@@ -21,3 +21,18 @@ export interface WellSamplesState {
 export const initialState: WellSamplesState = {
   samples: {},
 };
+
+export interface WellSelectionState {
+  selectedWellIds: string[];
+  selectedRowKeys: string[];
+}
+
+export interface AppState {
+  wellSamples: WellSamplesState;
+  wellSelection: WellSelectionState;
+}
+
+export const initialSelectionState: WellSelectionState = {
+  selectedWellIds: [],
+  selectedRowKeys: [],
+};
