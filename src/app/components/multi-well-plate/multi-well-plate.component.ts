@@ -135,15 +135,6 @@ export class MultiWellPlateComponent implements OnInit, OnDestroy {
 
   toggleWellSelection(event: MouseEvent, well: Well): void {
     this.selectionService.toggleWellSelection(event, well);
-
-    // After updating selectedWellIds, get all rowKeys for the wellId
-    const wellId = well.id;
-    const sampleData = this.samples[wellId] || {};
-    const targetNames = sampleData.targetNames || ['NoTarget'];
-    const selectedRowKeys = targetNames.map((targetName) => `${wellId}_${targetName}`);
-
-    // Dispatch updateSelectedRowKeys
-    this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
   }
 
 
