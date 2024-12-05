@@ -23,6 +23,10 @@ let wells: Well[][] = [];
  */
 let selectedWellIds: Set<string> = new Set();
 let lastSelectedWell: Well | null = null;
+/**
+ * this one is going to hold the rowKeys used by the chart and table component
+ */
+let selectedRowKeys: Set<string> = new Set();
 
 /**
  * This is the method that listens for messages coming from the main thread.
@@ -71,7 +75,16 @@ addEventListener('message', ({data}) => {
       postSelectionUpdate();
       break;
     case 'updateFromTable':
-      console.log("Nothing");
+      updatePlateFromTable(message.payload);
+      postSelectionUpdateFromTable();
+      break;
+    case 'selectWellById':
+      selectWellById(message.payload.wellId);
+      postSelectionUpdate();
+      break;
+    case 'selectRowByRowKey':
+      selectRowByRowKey(message.payload);
+      postRowKeyUpdate();
       break;
     default:
       console.error('Unknown message type:', message.type);
@@ -171,6 +184,35 @@ function toggleColumnSelection(payload: any): void {
 function clearSelection(): void {
   selectedWellIds.clear();
   lastSelectedWell = null;
+  selectedRowKeys.clear();
+}
+
+function updatePlateFromTable(payload: string[]): void {
+  clearSelection();
+  payload.forEach(wellId => {
+    selectedWellIds.add(wellId);
+  });
+}
+
+function selectWellById(wellId: string): void {
+  console.log(`Web Worker: Selecting wellId ${wellId}`);
+  const well = wells.flat().find(w => w.id === wellId);
+  if (well) {
+    selectedWellIds.add(wellId);
+    console.log(`Web Worker: WellId ${wellId} added to selectedWellIds`);
+  } else {
+    console.error(`Web Worker: Well with ID ${wellId} not found.`);
+  }
+}
+
+function selectRowByRowKey(rowKey: string) {
+  const [wellId, targetName] = rowKey.split('_');
+  console.log(`The wellId from the trace is ${wellId}`);
+  console.log(`The targetName from the trace is ${targetName}`);
+  if (rowKey) {
+    selectedRowKeys.clear();
+    selectedRowKeys.add(rowKey);
+  }
 }
 
 /**
@@ -179,4 +221,15 @@ function clearSelection(): void {
  */
 function postSelectionUpdate(): void {
   postMessage({type: 'selectionUpdate', payload: Array.from(selectedWellIds)});
+}
+
+/**
+ * we send to the main thread the
+ */
+function postSelectionUpdateFromTable(): void {
+  postMessage({type: 'selectionUpdateFromTable', payload: Array.from(selectedWellIds)});
+}
+
+function postRowKeyUpdate(): void {
+  postMessage({type: 'rowKeyUpdate', payload: Array.from(selectedRowKeys)});
 }

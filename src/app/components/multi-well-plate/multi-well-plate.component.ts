@@ -1,23 +1,20 @@
 import {Component, OnInit} from '@angular/core';
-import {
-  faBars,
-  faFlask,
-  faSearchMinus,
-  faSearchPlus,
-} from '@fortawesome/free-solid-svg-icons';
-import {mockWells, Well} from '../model/well';
-import {PlateService} from '../services/plate.service';
-import {WellSelectionService} from '../services/well-selection.service';
+import {faBars, faFlask, faSearchMinus, faSearchPlus,} from '@fortawesome/free-solid-svg-icons';
+import {mockWells, Well} from '../../model/well';
+import {PlateService} from '../../services/plate.service';
+import {WellSelectionService} from '../../services/well-selection.service';
 import {Store} from "@ngrx/store";
-import {WellSample, WellSamplesState} from "../store/well.state";
-import {selectAllSamples} from "../store/well.selectors";
-import {updateWellSample} from "../store/well.action";
+import {WellSample, WellSamplesState} from "../../store/well.state";
+import {selectAllSamples} from "../../store/well.selectors";
+import {updateWellSample} from "../../store/well.action";
+import {ChartDataItem} from "../../model/chart";
 
 @Component({
   selector: 'app-multi-well-plate',
   templateUrl: './multi-well-plate.component.html',
   styleUrls: ['./multi-well-plate.component.css'],
 })
+
 export class MultiWellPlateComponent implements OnInit {
   faFlask = faFlask;
   faSearchPlus = faSearchPlus;
@@ -35,6 +32,14 @@ export class MultiWellPlateComponent implements OnInit {
 
   baseCellSize: number = 30; // Base size for cells in pixels
   samples: Record<string, WellSample> = {};
+
+  isChartVisible: boolean = false;
+  chartData: any[] = []; // Holds the data to be passed to PlotlyChartComponent
+  mockChartData: ChartDataItem[] = []; // Now generated dynamically
+
+  toggleChart(): void {
+    this.isChartVisible = !this.isChartVisible;
+  }
 
   constructor(
     public plateService: PlateService,
@@ -61,6 +66,11 @@ export class MultiWellPlateComponent implements OnInit {
     this.store.select(selectAllSamples).subscribe((samples) => {
       this.samples = samples;
     });
+
+    this.selectionService.chartSelectionSubject.subscribe((rowKey: string) => {
+      const [wellId, targetName] = rowKey.split('_');
+      this.highlightWellInPlate(wellId); // Method to handle selection
+    });
   }
 
   get cellSize(): number {
@@ -79,7 +89,8 @@ export class MultiWellPlateComponent implements OnInit {
 
   /**
    * this functions extracts well data from an array with the values already predefined. Each well inside the array
-   * has its data synchronised with the well plate, well settings and table view.
+   * has its data synchronised with the well plate, well settings and table view. Also, it sends back an array of
+   * ChartDataItem to the chart-component for the rendering of the plot.
    */
   load(): void {
     this.selectionService.clearSelection();
@@ -87,7 +98,7 @@ export class MultiWellPlateComponent implements OnInit {
     mockWells.forEach((mockWell) => {
 
       /**
-       * for each well from the mockArray, we extract the data a well has.
+       * for each well from the mockArray, we extract the data a well contains.
        */
       const wellId = mockWell.id;
       const sampleId = mockWell.sampleId;
@@ -112,6 +123,9 @@ export class MultiWellPlateComponent implements OnInit {
         console.error(`Well ID ${wellId} not found on the current plate.`);
       }
     });
+
+    this.generateMockChartData();
+    this.prepareChartData();
   }
 
   toggleWellSelection(event: MouseEvent, well: Well): void {
@@ -167,6 +181,8 @@ export class MultiWellPlateComponent implements OnInit {
       this.currentWell = null;
       this.selectedWellsPositions = '';
     }
+
+    this.selectionService.plateSelectionSubject.next(currentSelection.selected);
   }
 
   /**
@@ -233,4 +249,82 @@ export class MultiWellPlateComponent implements OnInit {
       this.store.dispatch(updateWellSample({wellId: well.id, changes: {targetNames: targetNamesArray}}))
     });
   }
+
+  /**
+   * this method is responsible for creating the mockData for the chart based on the mockData for the plate.
+   * It randomly generates the y value, whereas the x vale is a sequence from 1 to 46.
+   */
+  generateMockChartData(): void {
+    this.mockChartData = [];
+
+    mockWells.forEach((well) => {
+      const wellId = well.id;
+      const targetNames = well.targetName ? well.targetName.split(',').map(name => name.trim()) : [];
+
+      targetNames.forEach((targetName) => {
+        const x = Array.from({length: 45}, (_, i) => i + 1);
+        const y = x.map(() => (Math.random() / 10)); // Generate random y values for demonstration
+
+        this.mockChartData.push({
+          wellId: wellId,
+          targetName: targetName,
+          x: x,
+          y: y,
+        });
+      });
+    });
+  }
+
+  /**
+   * Based on the mockData for the chart, it will create the charData array that will then be sent to the
+   * chart-component which will use it to render the plot.
+   */
+  prepareChartData(): void {
+    this.chartData = [];
+    this.mockChartData.forEach((dataItem) => {
+      const trace = {
+          x: dataItem.x,
+          y: dataItem.y,
+          type: 'scattergl',
+          mode: 'lines',
+          name: `${dataItem.wellId}_${dataItem.targetName}`,
+          hovertemplate: `<i>Well ID: ${dataItem.wellId}, Target Name: ${dataItem.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`,
+          line: {
+            width: 2,
+            opacity: 1,
+          }
+        }
+      ;
+      this.chartData.push(trace);
+    });
+  }
+
+  /**
+   * we sent to rowKey which was emitted in the chart component
+   * to the WellSelectionService.
+   */
+  onWellSelected(rowKey: string): void {
+    if (rowKey === 'clearSelection') {
+      this.selectionService.clearSelection();
+    } else {
+      this.selectionService.selectTableRowByKey(rowKey);
+      /* const [wellId, targetName] = rowKey.split('_');
+       console.log(wellId);
+       this.selectionService.chartSelectionSubject.next(wellId);*/
+    }
+  }
+
+  highlightWellInPlate(wellId: string): void {
+    const well = this.plateService.getFlatWells().find(w => w.id == wellId);
+
+    if (well) {
+      this.selectionService.clearSelection(); // Clear existing selections
+      this.selectionService.selection.select(well); // Select the corresponding well
+      this.updateCurrentWellPosition(); // Update well position display
+    } else {
+      console.error(`Well ID ${wellId} not found.`);
+    }
+  }
+
+
 }

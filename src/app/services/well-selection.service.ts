@@ -21,6 +21,18 @@ export class WellSelectionService {
    * of wells has changed
    */
   public selectionChangeSubject = new Subject<Well[]>();
+  public tableRowSelectionSubject = new Subject<string>();
+  public chartSelectionSubject = new Subject<string>();
+
+  /**
+   * Subject to emit well selections to the chart when selections are made on the plate.
+   */
+  public plateSelectionSubject = new Subject<Well[]>();
+
+  /**
+   * Subject to emit row key selections to the chart when selections are made in the table.
+   */
+  public tableSelectionSubject = new Subject<string[]>();
 
   constructor(private plateService: PlateService) {
     if (typeof Worker !== 'undefined') {
@@ -38,11 +50,15 @@ export class WellSelectionService {
         /**
          * if the message type is equal to "selectionUpdate", this means
          * that a selection update has happened.
-         * The payload that is coming back from the web worker is the Set with the well ids that
+         * The payload that is coming back from the web worker is an Array with the well ids that
          * are up for selection
          */
         if (message.type === 'selectionUpdate') {
           this.updateSelectionModel(message.payload);
+        } else if (message.type === 'selectionUpdateFromTable') {
+          this.updateSelectionFromTable(message.payload);
+        } else if (message.type === 'rowKeyUpdate') {
+          this.updateTableFromRowKey(message.payload);
         }
       };
       /**
@@ -102,13 +118,72 @@ export class WellSelectionService {
     this.worker.postMessage({type: 'clearSelection'});
   }
 
+  /**
+   * The purpose of this method is to upgrade the SelectionModel based on the computations done
+   * by the Web Worker. The Web Worker decides what wells will be selected, and this method only uses
+   * the selection model to actually make the selection changes.
+   */
   private updateSelectionModel(selectedWellIds: string[]): void {
     /**
      * we create a well array that will contain only the wells that have been marked by the web
-     * worker for selection. The identification is done using the Set<> from the web worker that contains the well ids.
+     * worker for selection. The identification is done using the Array from the web worker that contains the well ids.
      */
     const selectedWells = this.plateService.getWells().flat().filter((well) => {
-        return selectedWellIds.includes(well.id);
+      return selectedWellIds.includes(well.id);
+    });
+
+    /**
+     * we store the currently selected wells before the update takes place.
+     */
+    const previousSelection = this.selection.selected;
+    /**
+     * First we clear all the selected wells from the SelectionModule object, and then we tell it to select only
+     * the wells that are in the newly created array.
+     * With clear. we make sure that only the newly selected wells are parsed.
+     */
+    this.selection.clear();
+    this.selection.select(...selectedWells);
+
+    /**
+     * we check if the newly updated selection is different then the previous one.
+     */
+    const hasSelectionChanged =
+      previousSelection.length !== selectedWells.length ||
+      !previousSelection.every((well, index) => well.id === selectedWells[index].id);
+
+    /**
+     * if there are differences between the old and newly made selection,
+     * then we emit changes to the chart and the table, so that they will update accordingly.
+     */
+    if (hasSelectionChanged) {
+      this.plateSelectionSubject.next(selectedWells); // emit changes to the chart
+      this.selectionChangeSubject.next(selectedWells); // emit changes to the table
+    }
+  }
+
+
+  isSelected(well: Well): boolean {
+    return this.selection.isSelected(well);
+  }
+
+  /**
+   * we receive from the table component the wells that have been selected.
+   * We extract their ids and, we send those ids to the web worker.
+   */
+  selectionFromTable(selectedWells: Well[]): void {
+    const selectedWellIds = selectedWells.map(well => well.id);
+    this.worker.postMessage({type: "updateFromTable", payload: selectedWellIds});
+  }
+
+  selectTableRowByKey(rowKey: string): void {
+    this.tableRowSelectionSubject.next(rowKey);
+    this.tableSelectionSubject.next([rowKey]);
+    this.worker.postMessage({type: "selectRowByRowKey", payload: rowKey});
+  }
+
+  private updateSelectionFromTable(selectedWellsIds: string[]): void {
+    const selectedWells = this.plateService.getWells().flat().filter((well) => {
+        return selectedWellsIds.includes(well.id);
       }
     );
     /**
@@ -119,25 +194,25 @@ export class WellSelectionService {
     this.selection.select(...selectedWells);
 
     /**
-     * Emits the updated selection via selectionChangeSubject for any subscribed components. In this way, the
-     * changes are communicated to the components.
+     * this method is very similar to the updateSelectionModel. The main difference is that we don't emit
+     * any data using any subject.
      */
-    this.selectionChangeSubject.next(selectedWells);
   }
 
-  isSelected(well: Well): boolean {
-    return this.selection.isSelected(well);
-  }
-
-  /**
-   * we receive from the table the wells that have been selected. We extract their ids and we
-   * send those ids to the web worker.
-   */
-  updateSelectionFromTable(selectedWells: Well[]): void {
+  private updateTableFromRowKey(selectedRowKeys: string[]) {
     this.selection.clear();
-    this.selection.select(...selectedWells);
+    const selectedWells: Well[] = [];
 
-    const selectedWellIds = selectedWells.map(well => well.id);
-    this.worker.postMessage({type: "updateFromTable", payload: selectedWellIds})
+    selectedRowKeys.forEach(rowKey => {
+      this.tableRowSelectionSubject.next(rowKey);
+      const [wellId, targetName] = rowKey.split('_');
+      const selectedWell = this.plateService.getFlatWells().find(well => well.id === wellId);
+      if (selectedWell) {
+        selectedWells.push(selectedWell);
+      }
+    });
+
+    this.selection.select(...selectedWells);
   }
+
 }

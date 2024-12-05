@@ -19,6 +19,9 @@
     <button class="icon-btn" (click)="toggleMenu()">
       <fa-icon [icon]="faBars"></fa-icon>
     </button>
+    <button class="icon-btn" (click)="toggleChart()">
+      Toggle Chart
+    </button>
   </div>
 </div>
 
@@ -178,4 +181,7 @@
       </div>
     </div>
   </div>
+</div>
+<div class="chart-wrapper" *ngIf="isChartVisible">
+  <app-plotly-chart [chartData]="chartData" (selectedTraceEmitter)="onWellSelected($event)"></app-plotly-chart>
 </div>

@@ -1,12 +1,12 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Well} from '../model/well';
-import {PlateService} from '../services/plate.service';
-import {WellSample, WellSamplesState} from '../store/well.state';
-import {WellSelectionService} from '../services/well-selection.service';
+import {Well} from '../../model/well';
+import {PlateService} from '../../services/plate.service';
+import {WellSample, WellSamplesState} from '../../store/well.state';
+import {WellSelectionService} from '../../services/well-selection.service';
 import {DxDataGridComponent} from 'devextreme-angular';
-import {updateWellSample} from "../store/well.action";
-import {selectAllSamples} from "../store/well.selectors";
+import {updateWellSample} from "../../store/well.action";
+import {selectAllSamples} from "../../store/well.selectors";
 
 
 /**
@@ -59,7 +59,11 @@ export class PlateTableComponent implements OnInit {
         this.updateTableSelection(selectedWells);
       }
     );
+    this.selectionService.tableRowSelectionSubject.subscribe((rowKey: string) => {
+      this.updateTableFromChart(rowKey);
+    });
   }
+
 
   /**
    * this method is used to populate the wellsForTable[] that is going to be used as a datasource for the grid.
@@ -73,8 +77,8 @@ export class PlateTableComponent implements OnInit {
       const targetNames = sampleData.targetNames || [];
 
       if (targetNames.length > 0) {
-        targetNames.forEach((targetName, index) => {
-          const rowKey = `${well.id}_${index}`; // we create the unique key for each row.
+        targetNames.forEach((targetName) => {
+          const rowKey = `${well.id}_${targetName}`; // we create the unique key for each row.
           this.wellsForTable.push({
             ...well,
             sampleId: sampleData.sampleId,
@@ -84,7 +88,7 @@ export class PlateTableComponent implements OnInit {
           });
         });
       } else {
-        const rowKey = `${well.id}_0`;
+        const rowKey = `${well.id}_NoTarget`;
         this.wellsForTable.push({
           ...well,
           sampleId: sampleData.sampleId,
@@ -97,10 +101,11 @@ export class PlateTableComponent implements OnInit {
   }
 
   /**
-   * these two idexes are used for the display of the row and column identical with that of the plate.
+   * these two indexes are used for the display of the row and column identical with that of the plate.
    */
   rowIndex = (data: any) => data.row + 1;
   columnIndex = (data: any) => String.fromCharCode(data.column + 65);
+
   /**
    * This method receives the array that contains the wells that have been selected in the plate by the user. Using them,
    * we select the corresponding rows in the table.
@@ -128,19 +133,18 @@ export class PlateTableComponent implements OnInit {
    * this method is used to get the current rows selected at a given time.
    */
   onSelectionChanged(event: any): void {
-    /**
-     * check to prevent infinite loops
-     */
     if (this.isSelectionUpdatingFromPlate) {
       return;
     }
 
-    this.selectedWells = event.selectedRowKeys
-      .map((key: string) => this.wellsForTable.find((row) => row.rowKey === key))
-      .filter(Boolean) as WellTableRow[];
+    this.selectedWells = event.selectedRowsData as WellTableRow[];
 
     const selectedWellIds = this.selectedWells.map((well) => well.id);
     this.updatePlateSelection(selectedWellIds);
+
+    // Emit the selected row keys to the WellSelectionService
+    const selectedRowKeys = this.selectedWells.map((well) => well.rowKey);
+    this.selectionService.tableSelectionSubject.next(selectedRowKeys);
   }
 
   /**
@@ -149,8 +153,8 @@ export class PlateTableComponent implements OnInit {
   updatePlateSelection(wellIds: string[]): void {
     const selectedWells = this.plateService
       .getFlatWells()
-      .filter((well) => wellIds.includes(well.id));
-    this.selectionService.updateSelectionFromTable(selectedWells);
+      .filter((well) => wellIds.includes(well.id)); // filter the plate wells
+    this.selectionService.selectionFromTable(selectedWells);
   }
 
   /**
@@ -199,6 +203,18 @@ export class PlateTableComponent implements OnInit {
       const wellId = event.oldData.id;
       this.store.dispatch(updateWellSample({wellId, changes: changes}));
     }
+  }
+
+  updateTableFromChart(rowKey: string) {
+    this.isSelectionUpdatingFromPlate = true;
+
+    this.dataGrid.instance.clearSelection();
+
+    // Find the row corresponding to the rowKey and select it
+    this.dataGrid.instance.selectRows([rowKey], true).then(() => {
+      // Reset the selection update flag
+      this.isSelectionUpdatingFromPlate = false;
+    });
   }
 
 }
