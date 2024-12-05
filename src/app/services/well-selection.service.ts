@@ -82,6 +82,8 @@ export class WellSelectionService {
   private updateSelectionModel(selectedWellIds: string[]): void {
     this.store.dispatch(updateSelectedWellIds({selectedWellIds}));
     // Do not dispatch updateSelectedRowKeys here
+    const selectedRowKeys = this.getRowKeysFromWellIds(selectedWellIds);
+    this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
   }
 
   private updateSelectionFromTable(selectedWellIds: string[]): void {
@@ -92,7 +94,7 @@ export class WellSelectionService {
     this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
   }
 
-  /*private getRowKeysFromWellIds(wellIds: string[]): string[] {
+  private getRowKeysFromWellIds(wellIds: string[]): string[] {
     const selectedRowKeys: string[] = [];
     wellIds.forEach((wellId) => {
       const sampleData = this.samples[wellId] || {};
@@ -102,5 +104,5 @@ export class WellSelectionService {
       });
     });
     return selectedRowKeys;
-  }*/
+  }
 }

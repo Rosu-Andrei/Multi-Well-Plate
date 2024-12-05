@@ -96,8 +96,8 @@ function toggleWellSelection(payload: any): void {
 
   if (ctrlPressed && shiftPressed && lastSelectedWell) {
     const newSelection = getWellsInRange(lastSelectedWell, well);
-    for (const well of newSelection) {
-      selectedWellIds.add(well.id);
+    for (const wellInRange of newSelection) {
+      selectedWellIds.add(wellInRange.id);
     }
   } else if (ctrlPressed) {
     if (selectedWellIds.has(well.id)) {
@@ -105,13 +105,19 @@ function toggleWellSelection(payload: any): void {
     } else {
       selectedWellIds.add(well.id);
     }
-    lastSelectedWell = well;
+    // Only update lastSelectedWell if shift is not pressed
+    if (!shiftPressed) {
+      lastSelectedWell = well;
+    }
   } else {
     selectedWellIds.clear();
     selectedWellIds.add(well.id);
     lastSelectedWell = well;
   }
+  // After updating selection, send the update
+  postSelectionUpdate();
 }
+
 
 function getWellsInRange(startWell: Well, endWell: Well): Well[] {
   if (
