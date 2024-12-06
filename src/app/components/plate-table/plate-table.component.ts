@@ -106,15 +106,17 @@ export class PlateTableComponent implements OnInit {
     }
 
     this.selectedWells = event.selectedRowsData as WellTableRow[];
-
-    const selectedWellIds = this.selectedWells.map((well) => well.id);
-
-    // Update the selection in the store
-    this.store.dispatch(updateSelectedWellIds({selectedWellIds}));
-
-    // Update selected row keys in the store
     const selectedRowKeys = this.selectedWells.map((well) => well.rowKey);
+
+    // Update only the selectedRowKeys to reflect the exact user selection
     this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
+    /**
+     * the issue was that based on the selectedRowKeys, we were extracting the selectedWellIds as well,
+     * and dispatched them also for update. The problem was that In other parts of the application (e.g., for charting or well highlighting),
+     * selectedRowKeys was recalculated based on selectedWellIds.
+     * Since selectedWellIds only stored well IDs and not target names,
+     * all row keys corresponding to a given well ID were re-selected, even if the user had only selected a specific row.
+     */
   }
 
   onRowUpdating(event: any): void {
