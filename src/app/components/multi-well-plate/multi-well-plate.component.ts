@@ -91,12 +91,24 @@ export class MultiWellPlateComponent implements OnInit, OnDestroy {
     return this.baseCellSize * this.zoomLevel;
   }
 
+  /**
+   * This method is called the moment a user selects the plate size (96 or 384)
+   */
   selectPlate(plateSize: number | undefined): void {
     if (plateSize !== 96 && plateSize !== 384) {
       console.error('Unsupported plate size:', plateSize);
       return;
     }
+    /**
+     * the plateService is going to create the appropriate well[] based on the size.
+     * It will also create the headers for the rows and columns.
+     */
     this.plateService.setupPlate(plateSize);
+    /**
+     * the moment a new size of plate is selected, the selectionService will:
+     * 1. clear all the current selections
+     * 2.
+     */
     this.selectionService.clearSelection();
     this.selectionService.initializeWorker();
   }

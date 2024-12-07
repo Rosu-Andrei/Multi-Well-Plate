@@ -1,6 +1,8 @@
 /**
  *  The web worker is used to handle a part of the selection logic in a background thread
- *  to prevent blocking the main thread. This means that the UI remains responsive (doesn't freeze)
+ *  to prevent blocking the main thread. This means that the UI remains responsive (doesn't freeze).
+ *
+ *  The web worker handles the heavy computation operations that are required for all the selection types.
  */
 
 import {Well} from "./model/well";

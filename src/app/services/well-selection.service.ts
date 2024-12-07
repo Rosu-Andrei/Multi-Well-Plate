@@ -74,6 +74,13 @@ export class WellSelectionService {
     });
   }
 
+  /**
+   * this method will be used to clear all the selections that are currently in the plate.
+   * First, will send a message to the worker to let him know that a clearSelection action has been called,
+   * so that the worker will reset its internal store (the selectedWellIds Set and the lastSelectedWell constant)
+   * Secondly, will dispatch a clearSelection action to the store, so that it will clear the selectedWellId and
+   * selectedRowKey data.
+   */
   clearSelection(): void {
     this.worker.postMessage({type: 'clearSelection'});
     this.store.dispatch(clearSelection());
