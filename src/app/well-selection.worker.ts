@@ -18,13 +18,13 @@ interface WorkerMessage {
   payload: any;
 }
 
-let wells: Well[][] = [];
+let wells: Well[][] = []; // acts as a representation of the current well plate displayed in the web page.
 /**
  * The selectedWellIds are the main structure used by the web worker. It will contain
  * the ids of every well that are to be marked as selected. (it is repopulated at each lookup)
  */
 let selectedWellIds: Set<string> = new Set();
-let lastSelectedWell: Well | null = null;
+let lastSelectedWell: Well | null = null; // it is used for the box selection logic (the one with ctrl + shift).
 /**
  * this one is going to hold the rowKeys used by the chart and table component
  */
@@ -93,30 +93,45 @@ addEventListener('message', ({data}) => {
   }
 });
 
+/**
+ * this method is used when the user clicks a well on the plate. It receives the payload from the
+ * selectionService, and based on it, will add the appropriate wellId in the "selectedWellIds" Set
+ */
 function toggleWellSelection(payload: any): void {
-  const {ctrlPressed, shiftPressed, well} = payload;
+  const {ctrlPressed, shiftPressed, well} = payload; // extract the data from the main thread
 
+  /**
+   * we check if we are in the box selection case. If so, we create the well[] that represents
+   * all the wells selected in the box. We then add all of those wellIds to the Set.
+   */
   if (ctrlPressed && shiftPressed && lastSelectedWell) {
     const newSelection = getWellsInRange(lastSelectedWell, well);
     for (const wellInRange of newSelection) {
       selectedWellIds.add(wellInRange.id);
     }
   } else if (ctrlPressed) {
-    if (selectedWellIds.has(well.id)) {
-      selectedWellIds.delete(well.id);
+    if (selectedWellIds.has(well.id)) {  // in this case, if the wellId exists in the Set, it means the user wants to deselect it.
+      selectedWellIds.delete(well.id); // we remove the wellId from the Set (deselection)
     } else {
-      selectedWellIds.add(well.id);
+      selectedWellIds.add(well.id); // we are in the case of multi selection, and we add the wellId to the Set.
     }
     // Only update lastSelectedWell if shift is not pressed
     if (!shiftPressed) {
       lastSelectedWell = well;
     }
+    /**
+     * in this case it means we are in the case of a single well that has been selected,
+     * with no keyboard combination, just mouse click.
+     */
   } else {
     selectedWellIds.clear();
     selectedWellIds.add(well.id);
     lastSelectedWell = well;
   }
-  // After updating selection, send the update
+  /**
+   * after the "selectedWellsId" Set has been populated with the appropriate wellIds, we pass the Set as
+   * an Array back to the main thread.
+   */
   postSelectionUpdate();
 }
 
@@ -224,8 +239,7 @@ function selectRowByRowKey(rowKey: string) {
 }
 
 /**
- * this method is called for every case in the switch. It sends back to the main thread the Set that contains
- * all the wells id for selection.
+ * It sends back to the main thread the Set that contains all the wellIds for selection.
  */
 function postSelectionUpdate(): void {
   postMessage({type: 'selectionUpdate', payload: Array.from(selectedWellIds)});

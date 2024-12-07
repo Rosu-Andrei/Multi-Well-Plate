@@ -87,7 +87,7 @@
           <div *ngIf="plateService.wells.length > 0" class="plate-container">
             <!-- Plate Content Wrapper -->
             <div class="plate-content-wrapper">
-              <div class="row" *ngFor="let row of plateService.wells; let rowIndex = index">
+              <div class="row" *ngFor="let row of plateService.wells">
                 <!-- Wells -->
                 <div
                   class="cell well-cell"

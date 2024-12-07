@@ -20,12 +20,14 @@ export class WellSelectionService {
       this.worker = new Worker(new URL('../well-selection.worker.ts', import.meta.url), {
         type: 'module',
       });
-
+      /**
+       * we listen for messages coming from the web worker.
+       */
       this.worker.onmessage = ({data}) => {
         const message = data;
 
         if (message.type === 'selectionUpdate') {
-          this.updateSelectionModel(message.payload);
+          this.updateSelectionModel(message.payload); // the payload in this case is the wellIds array: ["A1", "B5"] for example.
         } else if (message.type === 'selectionUpdateFromTable') {
           this.updateSelectionFromTable(message.payload);
         } else if (message.type === 'rowKeyUpdate') {
@@ -54,7 +56,13 @@ export class WellSelectionService {
     });
   }
 
+  /**
+   * the method is called from the plate component the moment a user selects a well on the plate.
+   */
   toggleWellSelection(event: MouseEvent, well: Well): void {
+    /**
+     * we construct the payload for the web worker, and then dispatch the appropriate message to the web worker.
+     */
     const payload = {
       ctrlPressed: event.ctrlKey || event.metaKey,
       shiftPressed: event.shiftKey,
@@ -91,11 +99,20 @@ export class WellSelectionService {
     this.store.dispatch(clearSelection());
   }
 
+  /**
+   * it receives from the web worker the wellIds of the wells that have to be marked as selected.
+   * First, it dispatches the wellIds received from the web worker to the store. Then,
+   * it will generate the rowKeys based on the newly selected well ids and dispatch them to the store as well.
+   */
   private updateSelectionModel(selectedWellIds: string[]): void {
     this.store.dispatch(updateSelectedWellIds({selectedWellIds}));
-    // Do not dispatch updateSelectedRowKeys here
     const selectedRowKeys = this.getRowKeysFromWellIds(selectedWellIds);
-    this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
+    /**
+     * we dispatch this action also so that the appropriate traces in chart are highlighted based on the
+     * well selected on the plate. (Also, without this method call, the selection of a well
+     * won't be visible in the plate).
+     */
+    this.updateTableFromRowKeys(selectedRowKeys);
   }
 
   private updateSelectionFromTable(selectedWellIds: string[]): void {
@@ -106,9 +123,9 @@ export class WellSelectionService {
     this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
   }
 
-  private getRowKeysFromWellIds(wellIds: string[]): string[] {
+  private getRowKeysFromWellIds(selectedWellIds: string[]): string[] {
     const selectedRowKeys: string[] = [];
-    wellIds.forEach((wellId) => {
+    selectedWellIds.forEach((wellId) => {
       const sampleData = this.samples[wellId] || {};
       const targetNames = sampleData.targetNames || ['NoTarget'];
       targetNames.forEach((targetName: string) => {

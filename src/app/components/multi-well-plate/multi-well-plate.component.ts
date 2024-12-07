@@ -145,6 +145,14 @@ export class MultiWellPlateComponent implements OnInit, OnDestroy {
     this.prepareChartData();
   }
 
+  /**
+   * When the user selects a well in the plate, it will trigger this method to be called.
+   * The method receives 2 parameters, first the event that can contain data such as
+   * (if ctrl or shift was pressed when the well was clicked) and the second will be the
+   * Well object itself, for example :
+   * {id: 'A1', row: 0, column: 0, sampleRole: 'Negative Process Control', sampleId: '12', targetNames: ['Target5', 'Target4'] }
+   * The component will call the selectionService method with the same name.
+   */
   toggleWellSelection(event: MouseEvent, well: Well): void {
     this.selectionService.toggleWellSelection(event, well);
   }
