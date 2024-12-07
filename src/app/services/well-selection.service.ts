@@ -42,6 +42,11 @@ export class WellSelectionService {
     });
   }
 
+  /**
+   * this method will send to the web worker the well matrix. It does this so that
+   * the web worker has a representation of the well at its disposal for computations such as
+   * box selection, row selection, column selection etc.
+   */
   initializeWorker(): void {
     this.worker.postMessage({
       type: 'initialize',

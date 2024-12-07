@@ -1,15 +1,18 @@
-// plate-table.component.ts
-
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {AppState, WellSample} from '../../store/well.state';
-import {updateWellSample, updateSelectedWellIds, updateSelectedRowKeys} from '../../store/well.action';
+import {updateWellSample, updateSelectedRowKeys} from '../../store/well.action';
 import {PlateService} from '../../services/plate.service';
 import {WellSelectionService} from '../../services/well-selection.service';
 import {DxDataGridComponent} from 'devextreme-angular';
 import {Well} from '../../model/well';
 import {selectAllSamples, selectSelectedRowKeys, selectSelectedWellIds} from "../../store/well.selectors";
 
+/**
+ * the following interfaces it is used to represent the data of a row in the table.
+ * Apart from the usual data that a well has, it contains also a rowKey that acts as a unique id
+ * for each row of the table.
+ */
 interface WellTableRow extends Well {
   rowKey: string;
 }
@@ -20,9 +23,8 @@ interface WellTableRow extends Well {
   styleUrls: ['./plate-table.component.css'],
 })
 export class PlateTableComponent implements OnInit {
-  @ViewChild(DxDataGridComponent, {static: false})
-  dataGrid!: DxDataGridComponent;
 
+  @ViewChild(DxDataGridComponent, {static: false}) dataGrid!: DxDataGridComponent;
   wellsForTable: WellTableRow[] = [];
   samples: Record<string, WellSample> = {};
   selectedWells: WellTableRow[] = [];
@@ -31,7 +33,6 @@ export class PlateTableComponent implements OnInit {
   constructor(
     private plateService: PlateService,
     private store: Store<AppState>,
-    private selectionService: WellSelectionService
   ) {
   }
 

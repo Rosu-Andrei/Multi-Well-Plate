@@ -1,12 +1,5 @@
-// multi-well-plate.component.ts
-
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {
-  faBars,
-  faFlask,
-  faSearchMinus,
-  faSearchPlus,
-} from '@fortawesome/free-solid-svg-icons';
+import {faBars, faFlask, faSearchMinus, faSearchPlus,} from '@fortawesome/free-solid-svg-icons';
 import {mockWells, Well} from '../../model/well';
 import {PlateService} from '../../services/plate.service';
 import {WellSelectionService} from '../../services/well-selection.service';
@@ -15,7 +8,7 @@ import {WellSample, AppState} from '../../store/well.state';
 import {updateWellSample, updateSelectedRowKeys, clearSelection} from '../../store/well.action';
 import {ChartDataItem} from '../../model/chart';
 import {Subscription} from 'rxjs';
-import {selectAllSamples, selectSelectedRowKeys, selectSelectedWellIds} from "../../store/well.selectors";
+import {selectAllSamples, selectSelectedRowKeys} from "../../store/well.selectors";
 
 @Component({
   selector: 'app-multi-well-plate',
@@ -113,9 +106,16 @@ export class MultiWellPlateComponent implements OnInit, OnDestroy {
     this.selectionService.initializeWorker();
   }
 
+  /**
+   * the load function it is used to populate all the components with data already prepared. It
+   */
   load(): void {
     this.selectionService.clearSelection();
 
+    /**
+     * from each mock well we extract its data. We then check if in the plate exists a well with the id of
+     * the mock well, and if indeed exists, we dispatch to the store an update action.
+     */
     mockWells.forEach((mockWell) => {
       const wellId = mockWell.id;
       const sampleId = mockWell.sampleId;
