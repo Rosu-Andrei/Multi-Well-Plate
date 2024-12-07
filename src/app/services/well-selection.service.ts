@@ -71,6 +71,12 @@ export class WellSelectionService {
     this.worker.postMessage({type: 'toggleWellSelection', payload});
   }
 
+  /**
+   * the two parameters from the plate component are received. The payload that is sent to the web worker
+   * consists of two pieces:
+   * 1. if the ctrl key was pressed
+   * 2. the row index
+   */
   toggleRowSelection(event: MouseEvent, rowIndex: number): void {
     const ctrlPressed = event.ctrlKey || event.metaKey;
     this.worker.postMessage({

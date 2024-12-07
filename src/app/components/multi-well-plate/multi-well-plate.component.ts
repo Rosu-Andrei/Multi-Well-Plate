@@ -1,4 +1,4 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {faBars, faFlask, faSearchMinus, faSearchPlus,} from '@fortawesome/free-solid-svg-icons';
 import {mockWells, Well} from '../../model/well';
 import {PlateService} from '../../services/plate.service';
@@ -7,7 +7,6 @@ import {Store} from '@ngrx/store';
 import {WellSample, AppState} from '../../store/well.state';
 import {updateWellSample, updateSelectedRowKeys, clearSelection} from '../../store/well.action';
 import {ChartDataItem} from '../../model/chart';
-import {Subscription} from 'rxjs';
 import {selectAllSamples, selectSelectedRowKeys} from "../../store/well.selectors";
 
 @Component({
@@ -15,7 +14,7 @@ import {selectAllSamples, selectSelectedRowKeys} from "../../store/well.selector
   templateUrl: './multi-well-plate.component.html',
   styleUrls: ['./multi-well-plate.component.css'],
 })
-export class MultiWellPlateComponent implements OnInit, OnDestroy {
+export class MultiWellPlateComponent implements OnInit {
   faFlask = faFlask;
   faSearchPlus = faSearchPlus;
   faSearchMinus = faSearchMinus;
@@ -39,7 +38,6 @@ export class MultiWellPlateComponent implements OnInit, OnDestroy {
 
   selectedWellIds: string[] = [];
   selectedRowKeys: string[] = [];
-  private subscriptions: Subscription = new Subscription();
 
   constructor(
     public plateService: PlateService,
@@ -50,34 +48,26 @@ export class MultiWellPlateComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
-    // Subscribe to selectedRowKeys to update selectedWellIds
-    this.subscriptions.add(
-      this.store.select(selectSelectedRowKeys).subscribe((selectedRowKeys) => {
-        this.selectedRowKeys = selectedRowKeys;
-        const selectedWellIdsFromRowKeys = Array.from(
-          new Set(selectedRowKeys.map((key) => key.split('_')[0]))
-        );
 
-        // Update selectedWellIds only if they have changed
-        if (this.selectedWellIds.sort().join(',') !== selectedWellIdsFromRowKeys.sort().join(',')) {
-          this.selectedWellIds = selectedWellIdsFromRowKeys;
-          this.updateCurrentWellPosition();
-          this.updateSampleInfo();
-        }
-      })
-    );
 
-    // Subscribe to samples
-    this.subscriptions.add(
-      this.store.select(selectAllSamples).subscribe((samples) => {
-        this.samples = samples;
-      })
-    );
-  }
+    this.store.select(selectSelectedRowKeys).subscribe((selectedRowKeys) => {
+      this.selectedRowKeys = selectedRowKeys;
+      const selectedWellIdsFromRowKeys = Array.from(
+        new Set(selectedRowKeys.map((key) => key.split('_')[0]))
+      );
 
-  ngOnDestroy(): void {
-    // Unsubscribe to prevent memory leaks
-    this.subscriptions.unsubscribe();
+      // Update selectedWellIds only if they have changed
+      if (this.selectedWellIds.sort().join(',') !== selectedWellIdsFromRowKeys.sort().join(',')) {
+        this.selectedWellIds = selectedWellIdsFromRowKeys;
+        this.updateCurrentWellPosition();
+        this.updateSampleInfo();
+      }
+    });
+
+    this.store.select(selectAllSamples).subscribe((samples) => {
+      this.samples = samples;
+    })
+
   }
 
   get cellSize(): number {
@@ -157,7 +147,10 @@ export class MultiWellPlateComponent implements OnInit, OnDestroy {
     this.selectionService.toggleWellSelection(event, well);
   }
 
-
+  /**
+   * The method captures the mouse click event and the index of the row that was clicked
+   * (for row header = 1, the index is 0 in the well [][])
+   */
   toggleRowSelection(event: MouseEvent, rowIndex: number): void {
     this.selectionService.toggleRowSelection(event, rowIndex);
   }

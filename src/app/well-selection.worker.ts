@@ -175,11 +175,12 @@ function toggleRowSelection(payload: any): void {
   if (!rowWells) return;
 
   if (ctrlPressed) {
+    // we check if all the wells in that row are already selected
     const allSelected = rowWells.every((well) => selectedWellIds.has(well.id));
     if (allSelected) {
-      rowWells.forEach((well) => selectedWellIds.delete(well.id));
+      rowWells.forEach((well) => selectedWellIds.delete(well.id)); // deselect
     } else {
-      rowWells.forEach((well) => selectedWellIds.add(well.id));
+      rowWells.forEach((well) => selectedWellIds.add(well.id)); // select
     }
   } else {
     selectedWellIds.clear();
