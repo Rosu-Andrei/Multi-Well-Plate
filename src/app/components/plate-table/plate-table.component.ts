@@ -3,10 +3,9 @@ import {Store} from '@ngrx/store';
 import {AppState, WellSample} from '../../store/well.state';
 import {updateWellSample, updateSelectedRowKeys} from '../../store/well.action';
 import {PlateService} from '../../services/plate.service';
-import {WellSelectionService} from '../../services/well-selection.service';
 import {DxDataGridComponent} from 'devextreme-angular';
 import {Well} from '../../model/well';
-import {selectAllSamples, selectSelectedRowKeys, selectSelectedWellIds} from "../../store/well.selectors";
+import {selectAllSamples, selectSelectedRowKeys} from "../../store/well.selectors";
 
 /**
  * the following interfaces it is used to represent the data of a row in the table.
@@ -27,8 +26,8 @@ export class PlateTableComponent implements OnInit {
   @ViewChild(DxDataGridComponent, {static: false}) dataGrid!: DxDataGridComponent;
   wellsForTable: WellTableRow[] = [];
   samples: Record<string, WellSample> = {};
-  selectedWells: WellTableRow[] = [];
-  private isSelectionUpdatingFromPlate: boolean = false;
+  selectedRows: WellTableRow[] = [];
+  private selectionFromOtherComponent: boolean = false;
 
   constructor(
     private plateService: PlateService,
@@ -44,12 +43,12 @@ export class PlateTableComponent implements OnInit {
     });
 
     // Subscribe to selection changes
-    this.store.select(selectSelectedWellIds).subscribe((selectedWellIds) => {
+ /*   this.store.select(selectSelectedWellIds).subscribe((selectedWellIds) => {
       const selectedWells = this.wellsForTable.filter((row) =>
         selectedWellIds.includes(row.id)
       );
       this.updateTableSelection(selectedWells);
-    });
+    });*/
 
     // Subscribe to row key selection changes
     this.store.select(selectSelectedRowKeys).subscribe((selectedRowKeys) => {
@@ -92,12 +91,12 @@ export class PlateTableComponent implements OnInit {
   columnIndex = (data: any) => String.fromCharCode(data.column + 65);
 
   updateTableSelection(selectedWells: WellTableRow[]): void {
-    this.isSelectionUpdatingFromPlate = true;
+    this.selectionFromOtherComponent = true;
     const keysToSelect = selectedWells.map((row) => row.rowKey);
 
     this.dataGrid.instance.clearSelection();
     this.dataGrid.instance.selectRows(keysToSelect, true).then(() => {
-      this.isSelectionUpdatingFromPlate = false;
+      this.selectionFromOtherComponent = false;
     });
   }
 
@@ -106,15 +105,17 @@ export class PlateTableComponent implements OnInit {
    * such as sampleRole, targetName, rowKey etc.
    */
   onSelectionChanged(event: any): void {
-    if (this.isSelectionUpdatingFromPlate) {
+    if (this.selectionFromOtherComponent) {
       return;
     }
 
-    this.selectedWells = event.selectedRowsData as WellTableRow[]; // store the current selected rows
+    this.selectedRows = event.selectedRowsData as WellTableRow[]; // store the current selected rows locally
     /**
-     * from the current selected rows, we extract the rowKeys
+     * from the current selected rows, we extract the rowKeys, and then we dispatch them to the store.
+     * Since the changes are made in the store, any component subscribed to the store will receive the updates
+     * from the table selection.
      */
-    const selectedRowKeys = this.selectedWells.map((well) => well.rowKey);
+    const selectedRowKeys = this.selectedRows.map((well) => well.rowKey);
 
     this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
     /**
@@ -126,25 +127,36 @@ export class PlateTableComponent implements OnInit {
      */
   }
 
+  /**
+   * this method handles the editing of the sampleId, sampleRole and targetNames via the table.
+   */
   onRowUpdating(event: any): void {
-    const isMultipleSelection = this.selectedWells.length > 1;
+    const isMultipleSelection = this.selectedRows.length > 1;
     const changes: Partial<WellSample> = {};
 
+    // we check if the modified row has a new sampleId
     if (event.newData.sampleId !== undefined) {
       changes.sampleId = event.newData.sampleId;
     }
-
+    // we check if the modified row has a new sampleRole
     if (event.newData.sampleRole !== undefined) {
       changes.sampleRole = event.newData.sampleRole;
     }
 
     if (event.newData.targetName !== undefined) {
-      const oldTargetName = event.oldData.targetName;
-      const newTargetName = event.newData.targetName;
+      const oldTargetName = event.oldData.targetName; // extract the targetName before the update
+      const newTargetName = event.newData.targetName; //extract the targetName the user has entered
 
+      /**
+       * in the following 2 lines, the sample data for that wellId is extracted,
+       * and we retrieve the array of targetNames it has.
+       */
       const sampleData = this.samples[event.oldData.id] || {};
       let targetNames = sampleData.targetNames ? [...sampleData.targetNames] : [];
-
+      /**
+       * we get the position of the oldTargetName in the targetName array. If it exists, we replace
+       * the oldTargetName with the newTargetName. If it doesn't exist, we simply add it.
+       */
       const index = targetNames.indexOf(oldTargetName);
       if (index !== -1) {
         targetNames[index] = newTargetName;
@@ -154,9 +166,11 @@ export class PlateTableComponent implements OnInit {
 
       changes.targetNames = targetNames.slice(0, 7);
     }
-
+    /**
+     * we dispatch the changes made by the user in the table to the store
+     */
     if (isMultipleSelection) {
-      this.selectedWells.forEach((wellData) => {
+      this.selectedRows.forEach((wellData) => {
         let wellId = wellData.id;
         this.store.dispatch(updateWellSample({wellId, changes: changes}));
       });
@@ -166,15 +180,17 @@ export class PlateTableComponent implements OnInit {
     }
   }
 
+  /**
+   * this method is called whenever another component makes changes to the store, to the selectedRowKeys
+   * to be more precise. This method ensures that the table selects the rows accordingly to the
+   * selection done in another component.
+   */
   private updateTableFromRowKeys(selectedRowKeys: string[]): void {
-    this.isSelectionUpdatingFromPlate = true;
-
-    // Clear current selection
-    this.dataGrid.instance.clearSelection();
-
+    this.selectionFromOtherComponent = true;
+    this.dataGrid.instance.clearSelection(); // clear current table selection
     // Select the corresponding rows
     this.dataGrid.instance.selectRows(selectedRowKeys, true).then(() => {
-      this.isSelectionUpdatingFromPlate = false;
+      this.selectionFromOtherComponent = false;
     });
   }
 }

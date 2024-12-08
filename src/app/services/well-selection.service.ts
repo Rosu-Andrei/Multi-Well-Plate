@@ -1,11 +1,9 @@
-// well-selection.service.ts
-
 import {Injectable} from '@angular/core';
 import {PlateService} from './plate.service';
 import {Well} from '../model/well';
 import {Store} from '@ngrx/store';
 import {AppState, WellSample} from '../store/well.state';
-import {updateSelectedWellIds, updateSelectedRowKeys, clearSelection} from '../store/well.action';
+import {updateSelectedRowKeys, clearSelection} from '../store/well.action';
 import {selectAllSamples} from "../store/well.selectors";
 
 @Injectable({
@@ -28,10 +26,6 @@ export class WellSelectionService {
 
         if (message.type === 'selectionUpdate') {
           this.updateSelectionModel(message.payload); // the payload in this case is the wellIds array: ["A1", "B5"] for example.
-        } else if (message.type === 'selectionUpdateFromTable') {
-          this.updateSelectionFromTable(message.payload);
-        } else if (message.type === 'rowKeyUpdate') {
-          this.updateTableFromRowKeys(message.payload);
         }
       };
 
@@ -111,7 +105,7 @@ export class WellSelectionService {
    * it will generate the rowKeys based on the newly selected well ids and dispatch them to the store as well.
    */
   private updateSelectionModel(selectedWellIds: string[]): void {
-    this.store.dispatch(updateSelectedWellIds({selectedWellIds}));
+    //this.store.dispatch(updateSelectedWellIds({selectedWellIds}));
     const selectedRowKeys = this.getRowKeysFromWellIds(selectedWellIds);
     /**
      * we dispatch this action also so that the appropriate traces in chart are highlighted based on the
@@ -121,9 +115,9 @@ export class WellSelectionService {
     this.updateTableFromRowKeys(selectedRowKeys);
   }
 
-  private updateSelectionFromTable(selectedWellIds: string[]): void {
-    this.store.dispatch(updateSelectedWellIds({selectedWellIds}));
-  }
+  /* private updateSelectionFromTable(selectedWellIds: string[]): void {
+     this.store.dispatch(updateSelectedWellIds({selectedWellIds}));
+   }*/
 
   private updateTableFromRowKeys(selectedRowKeys: string[]): void {
     this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));

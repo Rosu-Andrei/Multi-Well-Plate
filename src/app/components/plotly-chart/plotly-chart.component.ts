@@ -1,18 +1,8 @@
-// plotly-chart.component.ts
-
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges,} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {AppState} from '../../store/well.state';
-import {updateSelectedRowKeys, updateSelectedWellIds} from '../../store/well.action';
-import {selectSelectedRowKeys, selectSelectedWellIds} from "../../store/well.selectors";
+import {updateSelectedRowKeys} from '../../store/well.action';
+import {selectSelectedRowKeys} from "../../store/well.selectors";
 
 @Component({
   selector: 'app-plotly-chart',
@@ -83,27 +73,6 @@ export class PlotlyChartComponent implements OnChanges, OnInit {
 
     this.graph.data.forEach((trace: any) => {
       if (selectedRowKeys.includes(trace.name)) {
-        // Highlight trace
-        trace.line.opacity = 1;
-        trace.line.width = 4;
-      } else {
-        // Dim trace
-        trace.line.opacity = 0.3;
-        trace.line.width = 0.5;
-      }
-    });
-    this.updateGraph();
-  }
-
-  private highlightTracesByWellIds(selectedWellIds: string[]): void {
-    if (selectedWellIds.length === 0) {
-      this.resetTraceStyles();
-      return;
-    }
-
-    this.graph.data.forEach((trace: any) => {
-      const [wellId] = trace.name.split('_');
-      if (selectedWellIds.includes(wellId)) {
         // Highlight trace
         trace.line.opacity = 1;
         trace.line.width = 4;
