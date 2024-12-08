@@ -6,13 +6,14 @@ import {PlateService} from '../../services/plate.service';
 import {DxDataGridComponent} from 'devextreme-angular';
 import {Well} from '../../model/well';
 import {selectAllSamples, selectSelectedRowKeys} from "../../store/well.selectors";
+import {WellSelectionService} from "../../services/well-selection.service";
 
 /**
  * the following interfaces it is used to represent the data of a row in the table.
  * Apart from the usual data that a well has, it contains also a rowKey that acts as a unique id
  * for each row of the table.
  */
-interface WellTableRow extends Well {
+export interface WellTableRow extends Well {
   rowKey: string;
 }
 
@@ -32,6 +33,7 @@ export class PlateTableComponent implements OnInit {
   constructor(
     private plateService: PlateService,
     private store: Store<AppState>,
+    private selectionService: WellSelectionService
   ) {
   }
 
@@ -111,23 +113,8 @@ export class PlateTableComponent implements OnInit {
     if (this.selectionFromOtherComponent) {
       return;
     }
-
     this.selectedRows = event.selectedRowsData as WellTableRow[]; // store the current selected rows locally
-    /**
-     * from the current selected rows, we extract the rowKeys, and then we dispatch them to the store.
-     * Since the changes are made in the store, any component subscribed to the store will receive the updates
-     * from the table selection.
-     */
-    const selectedRowKeys = this.selectedRows.map((well) => well.rowKey);
-
-    this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
-    /**
-     * the issue was that based on the selectedRowKeys, we were extracting the selectedWellIds as well,
-     * and dispatched them also for update. The problem was that In other parts of the application (e.g., for charting or well highlighting),
-     * selectedRowKeys was recalculated based on selectedWellIds.
-     * Since selectedWellIds only stored well IDs and not target names,
-     * all row keys corresponding to a given well ID were re-selected, even if the user had only selected a specific row.
-     */
+    this.selectionService.rowFromTables(event.selectedRowsData as WellTableRow[]); // we dispatch the selectedRows to the service.
   }
 
   /**

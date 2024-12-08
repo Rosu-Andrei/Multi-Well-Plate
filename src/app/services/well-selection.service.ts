@@ -5,6 +5,7 @@ import {Store} from '@ngrx/store';
 import {AppState, WellSample} from '../store/well.state';
 import {updateSelectedRowKeys, clearSelection} from '../store/well.action';
 import {selectAllSamples} from "../store/well.selectors";
+import {WellTableRow} from "../components/plate-table/plate-table.component";
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,8 @@ export class WellSelectionService {
 
         if (message.type === 'selectionUpdate') {
           this.updateSelectionModel(message.payload); // the payload in this case is the wellIds array: ["A1", "B5"] for example.
+        } else if (message.type === 'rowFromTable') {
+          this.updateTableFromRowKeys(message.payload);
         }
       };
 
@@ -134,4 +137,9 @@ export class WellSelectionService {
     });
     return selectedRowKeys;
   }
+
+  rowFromTables(selectedWellRows: WellTableRow[]) {
+    this.worker.postMessage({type: "rowFromTables", payload: selectedWellRows})
+  }
+
 }

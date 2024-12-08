@@ -6,6 +6,7 @@
  */
 
 import {Well} from "./model/well";
+import {WellTableRow} from "./components/plate-table/plate-table.component";
 
 /**
  * this interface defines the structure of the messages that are exchanged between the main thread and the worker thread.
@@ -75,6 +76,10 @@ addEventListener('message', ({data}) => {
        */
       clearSelection();
       postSelectionUpdate();
+      break;
+    case 'rowFromTables':
+      rowFromTable(message.payload);
+      postRowFromTableUpdate();
       break;
     default:
       console.error('Unknown message type:', message.type);
@@ -204,4 +209,21 @@ function clearSelection(): void {
 function postSelectionUpdate(): void {
   postMessage({type: 'selectionUpdate', payload: Array.from(selectedWellIds)});
 }
+
+/**
+ * the method receives the selected rows from the table. It extracts the rowKey from the selected
+ * array, and it adds it to the local storage of rowKeys that will be sent back to the main thread.
+ */
+function rowFromTable(payload: WellTableRow[]) {
+  clearSelection();
+  const selectedRowKeysFromTable = payload.map(well => well.rowKey);
+  selectedRowKeysFromTable.forEach(rowKey => {
+    selectedRowKeys.add(rowKey);
+  });
+}
+
+function postRowFromTableUpdate(): void {
+  postMessage({type: "rowFromTable", payload: Array.from(selectedRowKeys)});
+}
+
 
