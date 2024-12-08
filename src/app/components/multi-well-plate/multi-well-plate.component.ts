@@ -5,7 +5,7 @@ import {PlateService} from '../../services/plate.service';
 import {WellSelectionService} from '../../services/well-selection.service';
 import {Store} from '@ngrx/store';
 import {WellSample, AppState} from '../../store/well.state';
-import {updateWellSample, updateSelectedRowKeys, clearSelection} from '../../store/well.action';
+import {updateWellSample} from '../../store/well.action';
 import {ChartDataItem} from '../../model/chart';
 import {selectAllSamples, selectSelectedRowKeys} from "../../store/well.selectors";
 
@@ -336,14 +336,6 @@ export class MultiWellPlateComponent implements OnInit {
       };
       this.chartData.push(trace);
     });
-  }
-
-  onWellSelected(rowKey: string): void {
-    if (rowKey === 'clearSelection') {
-      this.store.dispatch(clearSelection());
-    } else {
-      this.store.dispatch(updateSelectedRowKeys({selectedRowKeys: [rowKey]}));
-    }
   }
 
   toggleChart(): void {
