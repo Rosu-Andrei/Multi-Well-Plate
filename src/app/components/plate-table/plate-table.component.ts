@@ -101,15 +101,21 @@ export class PlateTableComponent implements OnInit {
     });
   }
 
+  /**
+   * this method is called whenever the user selects a row from the table. The event contains all the data of the selected row,
+   * such as sampleRole, targetName, rowKey etc.
+   */
   onSelectionChanged(event: any): void {
     if (this.isSelectionUpdatingFromPlate) {
       return;
     }
 
-    this.selectedWells = event.selectedRowsData as WellTableRow[];
+    this.selectedWells = event.selectedRowsData as WellTableRow[]; // store the current selected rows
+    /**
+     * from the current selected rows, we extract the rowKeys
+     */
     const selectedRowKeys = this.selectedWells.map((well) => well.rowKey);
 
-    // Update only the selectedRowKeys to reflect the exact user selection
     this.store.dispatch(updateSelectedRowKeys({selectedRowKeys}));
     /**
      * the issue was that based on the selectedRowKeys, we were extracting the selectedWellIds as well,
