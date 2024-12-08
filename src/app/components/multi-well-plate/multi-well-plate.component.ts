@@ -104,7 +104,9 @@ export class MultiWellPlateComponent implements OnInit {
 
     /**
      * from each mock well we extract its data. We then check if in the plate exists a well with the id of
-     * the mock well, and if indeed exists, we dispatch to the store an update action.
+     * the mock well, and if indeed exists, we dispatch to the store an update action for that well.
+     * By dispatching an action to the store for each well, we make sure that the sampleData
+     * will be also available and in sync in the table component.
      */
     mockWells.forEach((mockWell) => {
       const wellId = mockWell.id;
@@ -114,7 +116,7 @@ export class MultiWellPlateComponent implements OnInit {
         ? mockWell.targetName.split(',').map((name) => name.trim()).slice(0, 7)
         : [];
 
-      const well = this.plateService.getFlatWells().find((w) => w.id === wellId);
+      const well = this.plateService.getFlatWells().find(w => w.id === wellId);
       if (well) {
         this.store.dispatch(
           updateWellSample({
@@ -181,11 +183,18 @@ export class MultiWellPlateComponent implements OnInit {
     this.activeTab = tab;
   }
 
+  /**
+   * this method checks whether a well has its id in the selectedWellIds.
+   * If it has, it means that is selected and will be marked as such in the plate.
+   */
   isSelected(well: Well): boolean {
     return this.selectedWellIds.includes(well.id);
   }
 
-
+  /**
+   * this method is used to display the wellIds of the wells that are currently selected
+   * in the well settings tab.
+   */
   updateCurrentWellPosition(): void {
     const selectedWells = this.plateService
       .getFlatWells()
@@ -203,11 +212,18 @@ export class MultiWellPlateComponent implements OnInit {
     }
   }
 
+  /**
+   * this method is responsible to update the sampleId, sampleRole and targetName fields
+   * in the well settings tab.
+   */
   updateSampleInfo(): void {
     const selectedWells = this.plateService
       .getFlatWells()
       .filter((well) => this.selectedWellIds.includes(well.id));
-
+    /**
+     * if the currentWell is not null, it means that only one well is selected,
+     * and we update the fields with its data.
+     */
     if (this.currentWell) {
       const sampleData = this.samples[this.currentWell.id] || {};
       this.sampleId = sampleData.sampleId || '';
@@ -229,37 +245,62 @@ export class MultiWellPlateComponent implements OnInit {
     }
   }
 
+  /**
+   * in the well settings tab, when the user updates the sampleId for one or more wells,
+   * this method will be called.
+   */
   onSampleIdChange(newSampleId: string): void {
-    this.sampleId = newSampleId;
+    this.sampleId = newSampleId; // used in the html, 2 way binding
+    /**
+     * for each well that is currently selected, we dispatch to the store the new sampleId.
+     * Because we dispatch to the store the change, the new sampleId value will be visible also
+     * in the other components.
+     */
     this.selectedWellIds.forEach((wellId) => {
       this.store.dispatch(updateWellSample({wellId, changes: {sampleId: newSampleId}}));
     });
   }
 
+  /**
+   * updates the store with the newly selected sampleRoles.
+   */
   onSampleRoleChange(newSampleRole: string): void {
-    this.sampleRole = newSampleRole;
+    this.sampleRole = newSampleRole; // used in the html for updating the value in the well settings view.
+    /**
+     * for each well that is selected, we updated the sampleRole with the value selected by the user.
+     */
     this.selectedWellIds.forEach((wellId) => {
       this.store.dispatch(updateWellSample({wellId, changes: {sampleRole: newSampleRole}}));
     });
   }
 
+  /**
+   * similar to the other 2 methods. We create an array with the targetNames entered by the user, and we update
+   * all the selected wells with those targetNames. (by dispatching the array of targetNames to the store)
+   */
   onTargetNameChange(newTargetNames: string): void {
-    this.targetNames = newTargetNames;
+    this.targetNames = newTargetNames; // we extract the newly entered targetNames for html update
     const targetNamesArray = newTargetNames.split(',').map((name) => name.trim()).slice(0, 7);
     this.selectedWellIds.forEach((wellId) => {
       this.store.dispatch(updateWellSample({wellId, changes: {targetNames: targetNamesArray}}));
     });
   }
 
+  /**
+   * this method is called when the load() takes place. It prepares the ChartData from the mockWell
+   * that will eventually be passed to the chart component.
+   */
   generateMockChartData(): void {
-    this.mockChartData = [];
+    this.mockChartData = []; // represents the data that a trace contains (wellId, targetNames, x and y coordinates)
 
     mockWells.forEach((well) => {
       const wellId = well.id;
       const targetNames = well.targetName
-        ? well.targetName.split(',').map((name) => name.trim())
+        ? well.targetName.split(',').map(name => name.trim())
         : [];
-
+      /**
+       * for each targetName that a well has, we calculate different x and y values.
+       */
       targetNames.forEach((targetName) => {
         const x = Array.from({length: 45}, (_, i) => i + 1);
         const y = x.map(() => Math.random() / 10);
@@ -274,6 +315,10 @@ export class MultiWellPlateComponent implements OnInit {
     });
   }
 
+  /**
+   * this method will generate the chart data based on the ChartData array that was created on the loading.
+   * Since the chartData[] is an @Input element of chart component, the chart will receive all the data.
+   */
   prepareChartData(): void {
     this.chartData = [];
     this.mockChartData.forEach((dataItem) => {
