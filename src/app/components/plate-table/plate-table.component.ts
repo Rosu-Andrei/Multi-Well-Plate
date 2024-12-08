@@ -23,10 +23,10 @@ interface WellTableRow extends Well {
 })
 export class PlateTableComponent implements OnInit {
 
-  @ViewChild(DxDataGridComponent, {static: false}) dataGrid!: DxDataGridComponent;
-  wellsForTable: WellTableRow[] = [];
-  samples: Record<string, WellSample> = {};
-  selectedRows: WellTableRow[] = [];
+  @ViewChild(DxDataGridComponent, {static: false}) dataGrid!: DxDataGridComponent; // instant of the grid
+  wellsForTable: WellTableRow[] = []; // represents the data source for the grid.
+  samples: Record<string, WellSample> = {}; // local representation of the samples from the store
+  selectedRows: WellTableRow[] = []; // stores the currently selected rows
   private selectionFromOtherComponent: boolean = false;
 
   constructor(
@@ -35,34 +35,44 @@ export class PlateTableComponent implements OnInit {
   ) {
   }
 
+  /**
+   * On the init hook we subscribe to the selectAllSamples part of the store, so that any update made to data such as
+   * sampleId, sampleRole and targetNames will be synced with the table.
+   *
+   * In addition, we subscribe the table component to the selectedRowKeys part of the store also, so that any selection
+   * done in any other component will be accordingly mirrored in the table.
+   */
   ngOnInit(): void {
-    // Subscribe to samples
     this.store.select(selectAllSamples).subscribe((samples) => {
       this.samples = samples;
       this.initializeWellsForTable();
     });
-
-    // Subscribe to selection changes
- /*   this.store.select(selectSelectedWellIds).subscribe((selectedWellIds) => {
-      const selectedWells = this.wellsForTable.filter((row) =>
-        selectedWellIds.includes(row.id)
-      );
-      this.updateTableSelection(selectedWells);
-    });*/
-
-    // Subscribe to row key selection changes
     this.store.select(selectSelectedRowKeys).subscribe((selectedRowKeys) => {
       this.updateTableFromRowKeys(selectedRowKeys);
     });
+
+    // Subscribe to selection changes
+    /*   this.store.select(selectSelectedWellIds).subscribe((selectedWellIds) => {
+         const selectedWells = this.wellsForTable.filter((row) =>
+           selectedWellIds.includes(row.id)
+         );
+         this.updateTableSelection(selectedWells);
+       });*/
   }
 
+  /**
+   * the following method is responsible to populate the wellsForTable array that acts as the data source for the
+   * grid. It is called every time a change is made in the sample store (so that the table data is up-to-date)
+   */
   initializeWellsForTable(): void {
-    this.wellsForTable = [];
-
+    this.wellsForTable = []; // we clear the current data source.
     this.plateService.getFlatWells().forEach((well) => {
       const sampleData = this.samples[well.id] || {};
       const targetNames = sampleData.targetNames || [];
 
+      /**
+       * we create the rowKey for each targetName a well has and then push the data in the wellsForTable
+       */
       if (targetNames.length > 0) {
         targetNames.forEach((targetName) => {
           const rowKey = `${well.id}_${targetName}`;
@@ -87,18 +97,11 @@ export class PlateTableComponent implements OnInit {
     });
   }
 
+  /**
+   * the below 2 attributes represent the cell values of the row and column in the grid.
+   */
   rowIndex = (data: any) => data.row + 1;
   columnIndex = (data: any) => String.fromCharCode(data.column + 65);
-
-  updateTableSelection(selectedWells: WellTableRow[]): void {
-    this.selectionFromOtherComponent = true;
-    const keysToSelect = selectedWells.map((row) => row.rowKey);
-
-    this.dataGrid.instance.clearSelection();
-    this.dataGrid.instance.selectRows(keysToSelect, true).then(() => {
-      this.selectionFromOtherComponent = false;
-    });
-  }
 
   /**
    * this method is called whenever the user selects a row from the table. The event contains all the data of the selected row,
