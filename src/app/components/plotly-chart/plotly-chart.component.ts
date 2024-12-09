@@ -1,8 +1,8 @@
 import {Component, Input, OnChanges, OnInit, SimpleChanges,} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {AppState} from '../../store/well.state';
-import {updateSelectedRowKeys} from '../../store/well.action';
 import {selectSelectedRowKeys} from "../../store/well.selectors";
+import {WellSelectionService} from "../../services/well-selection.service";
 
 @Component({
   selector: 'app-plotly-chart',
@@ -33,7 +33,7 @@ export class PlotlyChartComponent implements OnChanges, OnInit {
 
   selectedRowKeys: string[] = [];
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<AppState>, private selectionService: WellSelectionService) {
   }
 
   /**
@@ -57,30 +57,12 @@ export class PlotlyChartComponent implements OnChanges, OnInit {
   }
 
   /**
-   * the method is called when the user clicks on a trace. Through the event we extract the data that the selected
-   * trace contains, most importantly its name that is equivalent with the rowKey.
+   * the method is called when the user clicks on a trace. Through the event we extract the name of the trace,
+   * which is essentially the rowKey and we send it to the selection service.
    */
   onChartClick(event: any): void {
-    const traceIndex = event.points[0].fullData.index;
-    const trace = event.points[0].fullData;
-    const fullTraceName = trace.name; // extract the rowKey
-    const [wellId, targetName] = fullTraceName.split('_');
-    const rowKey = `${wellId}_${targetName}`;
-    let updatedRowKeys: string[] = [];
-
-    /**
-     * we check our local variable that stores the currently selected rowKeys if the trace that
-     * the user has clicked has its rowKey already in the variable. If it is already, it means
-     * that the intent is to deselect the trace.
-     */
-    if (this.selectedRowKeys.includes(rowKey)) {
-      // Deselect the trace
-      updatedRowKeys = this.selectedRowKeys.filter((key) => key !== rowKey);
-    } else {
-      // add the newly selected trace rowKey to those that were already selected before
-      updatedRowKeys = [...this.selectedRowKeys, rowKey];
-    }
-    this.store.dispatch(updateSelectedRowKeys({selectedRowKeys: updatedRowKeys}));
+    const traceName: string = event.points[0].fullData.name;
+    this.selectionService.tracesFromChart(traceName);
   }
 
   /**

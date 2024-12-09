@@ -79,7 +79,11 @@ addEventListener('message', ({data}) => {
       break;
     case 'rowFromTables':
       rowFromTable(message.payload);
-      postRowFromTableUpdate();
+      postRowKeyUpdate();
+      break;
+    case 'tracesFromChart':
+      tracesFromChart(message.payload);
+      postRowKeyUpdate();
       break;
     default:
       console.error('Unknown message type:', message.type);
@@ -210,6 +214,10 @@ function postSelectionUpdate(): void {
   postMessage({type: 'selectionUpdate', payload: Array.from(selectedWellIds)});
 }
 
+function postRowKeyUpdate(): void {
+  postMessage({type: "rowFromTable", payload: Array.from(selectedRowKeys)});
+}
+
 /**
  * the method receives the selected rows from the table. It extracts the rowKey from the selected
  * array, and it adds it to the local storage of rowKeys that will be sent back to the main thread.
@@ -222,8 +230,23 @@ function rowFromTable(payload: WellTableRow[]) {
   });
 }
 
-function postRowFromTableUpdate(): void {
-  postMessage({type: "rowFromTable", payload: Array.from(selectedRowKeys)});
+/**
+ * this function is called when the user selects or deselects a trace in the chart.
+ * It updates the selectedRowKey Set and sends it back to the main thread.
+ */
+function tracesFromChart(traceName: string): void {
+  const [wellId, targetName] = traceName.split('_');
+  const rowKey = `${wellId}_${targetName}`;
+  let updatedRowKeys: string[];
+  let selectedRowKeysArray = Array.from(selectedRowKeys);
+
+  if (selectedRowKeys.has(rowKey)) {
+    updatedRowKeys = selectedRowKeysArray.filter((key) => key !== rowKey); // deselect
+  } else {
+    updatedRowKeys = [...selectedRowKeysArray, rowKey]; // add newly selected trace
+  }
+  selectedRowKeys = new Set(updatedRowKeys);
 }
+
 
 

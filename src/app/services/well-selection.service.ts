@@ -142,4 +142,12 @@ export class WellSelectionService {
     this.worker.postMessage({type: "rowFromTables", payload: selectedWellRows})
   }
 
+  /**
+   * this method receives the traceName of the trace that the user has pressed and
+   * sends it to the web worker as a payload.
+   */
+  tracesFromChart(traceName: string): void {
+    this.worker.postMessage({type: "tracesFromChart", payload: traceName});
+  }
+
 }
