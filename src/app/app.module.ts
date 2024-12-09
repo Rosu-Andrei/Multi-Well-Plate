@@ -16,6 +16,7 @@ import {wellSamplesReducer, wellSelectionReducer} from "./store/well.reducer";
 import * as PlotlyJS from 'plotly.js-dist-min';
 import {PlotlyModule} from 'angular-plotly.js';
 import {PlotlyChartComponent} from './components/plotly-chart/plotly-chart.component';
+import {HttpClientModule} from "@angular/common/http";
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -38,7 +39,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
       wellSamples: wellSamplesReducer,
       wellSelection: wellSelectionReducer
     }),
-    PlotlyModule
+    PlotlyModule,
+    HttpClientModule
   ],
   providers: [
     provideClientHydration(),

@@ -8,6 +8,7 @@ import {WellSample, AppState} from '../../store/well.state';
 import {updateWellSample} from '../../store/well.action';
 import {ChartDataItem} from '../../model/chart';
 import {selectAllSamples, selectSelectedRowKeys} from "../../store/well.selectors";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
   selector: 'app-multi-well-plate',
@@ -42,7 +43,8 @@ export class MultiWellPlateComponent implements OnInit {
   constructor(
     public plateService: PlateService,
     public selectionService: WellSelectionService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private http: HttpClient
   ) {
   }
 
@@ -340,5 +342,145 @@ export class MultiWellPlateComponent implements OnInit {
 
   toggleChart(): void {
     this.isChartVisible = !this.isChartVisible;
+  }
+
+  /**
+   * this load function takes data from the .json document in the assets folder, instead
+   * of using the mockData.
+   */
+  public load_json(): void {
+    this.selectionService.clearSelection(); // clear all current selections
+
+    // Fetch the json file from assets
+    this.http.get<any[]>('assets/baseline_subtracted_stringifed_chart_data.json').subscribe(jsonData => {
+
+      /**
+       * since in the json file every wellId (wellPosition) has multiple data,
+       * we use a map to store the information.
+       */
+      const wellsMap = new Map<string, { sampleId?: string; sampleRole?: string; targets: string[] }>();
+
+      jsonData.forEach(item => {
+        const wellId = item.wellPosition; // we extract the wellId inside each item
+        let entry = wellsMap.get(wellId); // we get the data specific to a wellId from the map
+
+        /**
+         * if the entry is undefined, it means that it doesn't exist, so we add it to the map
+         */
+        if (!entry) {
+          entry = {
+            sampleId: item.targets, // the sampleId is named 'targets' in the json file
+            sampleRole: this.mapSampleTypeToSampleRole(item.sampleType),
+            targets: [item.targetName]
+          };
+          wellsMap.set(wellId, entry);
+          /**
+           * if the entry already exists, it means that we only need to add a new targetName,
+           * since all the other data ar considered to be the same.
+           */
+        } else {
+          entry.targets.push(item.targetName);
+        }
+      });
+
+      /**
+       * we create a Well[] from the json data. We need this array so that the sample store
+       * it is updated accordingly to the data in the json
+       */
+      const wellsArray: Well[] = [];
+      wellsMap.forEach((value, key) => {
+        wellsArray.push({
+          id: key,
+          sampleId: value.sampleId,
+          sampleRole: value.sampleRole,
+          targetName: value.targets.join(',')
+        });
+      });
+
+      /**
+       * we display to the sample store the new values after the json data has been
+       * configured to a Well array.
+       */
+      wellsArray.forEach((well) => {
+        const sampleId = well.sampleId;
+        const sampleRole = well.sampleRole;
+        const targetNames = well.targetName
+          ? well.targetName.split(',').map(name => name.trim()).slice(0, 7)
+          : [];
+
+        const plateWell = this.plateService.getFlatWells().find(w => w.id === well.id);
+        if (plateWell) {
+          this.store.dispatch(
+            updateWellSample({
+              wellId: plateWell.id,
+              changes: {
+                sampleId: sampleId,
+                sampleRole: sampleRole,
+                targetNames: targetNames,
+              },
+            })
+          );
+        } else {
+          console.error(`Well ID ${well.id} not found on the current plate.`);
+        }
+      });
+      /**
+       * send the json data to the method that will create the chartData based on the values
+       * stored in the .json.
+       */
+      this.generateChartDataFromJson(jsonData)
+    });
+  }
+
+  /**
+   * Map the sampleType from the JSON to the known sampleRoles.
+   */
+  private mapSampleTypeToSampleRole(sampleType: string): string {
+    switch (sampleType.toUpperCase()) {
+      case 'UNKNOWN':
+        return 'Unknown Sample';
+      case 'NPC':
+        return 'Negative Process Control';
+      case 'PPC':
+        return 'Positive Process Control';
+      case 'PTC':
+        return 'Positive Template Control'
+      case 'NTC':
+        return 'Negative Template Control'
+      case 'QS':
+        return 'Quantitation Standard'
+      default:
+        return 'Unknown Sample';
+    }
+  }
+
+  /**
+   * The method takes the data from the .json file and creates the appropriate chartData based on it
+   */
+  private generateChartDataFromJson(jsonData: any[]): void {
+    this.chartData = [];
+    jsonData.forEach(item => {
+      const xValues = Object.values(item.x);
+      const yValues = Object.values(item.y);
+      const traceName = `${item.wellPosition}_${item.targetName}`;
+
+      /**
+       * we pupulate the data for each trace. We make sure that the trace.name has the format of a
+       * rowKey, otherwise the sync will break between the chart and the rest of the components.
+       */
+      const trace = {
+        x: xValues,
+        y: yValues,
+        type: item.type,
+        mode: item.mode,
+        name: traceName,
+        hovertemplate: `<i>Well Position: ${item.wellPosition}, Run ID: ${item.runId},Target Name: ${item.targetName}</i><br>X: %{x}<br>Y: %{y}<extra></extra>`,
+        line: {
+          width: 2,
+          opacity: 1,
+        },
+      };
+      this.chartData.push(trace);
+    });
   }
 }
