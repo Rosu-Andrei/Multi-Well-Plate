@@ -22,7 +22,7 @@ export class PlotlyChartComponent implements OnChanges, OnInit {
   public graph: any = {
     data: [],
     layout: {
-      title: 'Plot',
+      title: 'Chart',
       xaxis: {title: 'X Axis'},
       yaxis: {title: 'Y Axis'},
     },
