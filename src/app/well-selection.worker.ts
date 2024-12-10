@@ -234,16 +234,18 @@ function rowFromTable(payload: WellTableRow[]) {
  * this function is called when the user selects or deselects a trace in the chart.
  * It updates the selectedRowKey Set and sends it back to the main thread.
  */
-function tracesFromChart(traceName: string): void {
+function tracesFromChart(payload: any): void {
+  const traceName = payload.traceName;
+  const rowKeysFromPlate = payload.selectedRowKeys as string[];
   const [wellId, targetName] = traceName.split('_');
   const rowKey = `${wellId}_${targetName}`;
   let updatedRowKeys: string[];
-  let selectedRowKeysArray = Array.from(selectedRowKeys);
 
-  if (selectedRowKeys.has(rowKey)) {
-    updatedRowKeys = selectedRowKeysArray.filter((key) => key !== rowKey); // deselect
+
+  if (rowKeysFromPlate.includes(rowKey)) {
+    updatedRowKeys = rowKeysFromPlate.filter((key) => key !== rowKey); // deselect
   } else {
-    updatedRowKeys = [...selectedRowKeysArray, rowKey]; // add newly selected trace
+    updatedRowKeys = [...rowKeysFromPlate, rowKey]; // add newly selected trace
   }
   selectedRowKeys = new Set(updatedRowKeys);
 }

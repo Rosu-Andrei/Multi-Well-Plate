@@ -146,8 +146,8 @@ export class WellSelectionService {
    * this method receives the traceName of the trace that the user has pressed and
    * sends it to the web worker as a payload.
    */
-  tracesFromChart(traceName: string): void {
-    this.worker.postMessage({type: "tracesFromChart", payload: traceName});
+  tracesFromChart(traceName: string, selectedRowKeys: string[]): void {
+    this.worker.postMessage({type: "tracesFromChart", payload: {traceName, selectedRowKeys}});
   }
 
 }

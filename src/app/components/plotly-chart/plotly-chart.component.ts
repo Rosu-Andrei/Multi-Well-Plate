@@ -62,7 +62,7 @@ export class PlotlyChartComponent implements OnChanges, OnInit {
    */
   onChartClick(event: any): void {
     const traceName: string = event.points[0].fullData.name;
-    this.selectionService.tracesFromChart(traceName);
+    this.selectionService.tracesFromChart(traceName, this.selectedRowKeys);
   }
 
   /**
